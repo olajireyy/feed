@@ -1,0 +1,1 @@
+web: gunicorn campusfeed_project.wsgi

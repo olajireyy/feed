@@ -1,0 +1,397 @@
+{% extends 'general_base.html' %}
+
+{% block title %}Profile - CampusFeed{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        padding: 24px;
+        text-align: center;
+    }
+    
+    .profile-picture-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 16px;
+    }
+    
+    .profile-picture-large {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 4px solid var(--bg-primary);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    
+    .profile-picture-large img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .profile-picture-large i {
+        font-size: 60px;
+        color: white;
+    }
+    
+    .change-picture-btn {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        border: 3px solid var(--bg-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .change-picture-btn:hover {
+        transform: scale(1.1);
+        background-color: #1a8cd8;
+    }
+    
+    .change-picture-btn i {
+        color: white;
+        font-size: 18px;
+    }
+    
+    .profile-form-section {
+        background-color: var(--bg-secondary);
+        border-radius: 16px;
+        padding: 24px;
+        margin: 16px;
+    }
+    
+    .form-label-modern {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-control-modern {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: 8px;
+        padding: 12px;
+        width: 100%;
+        font-size: 15px;
+    }
+    
+    .form-control-modern:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin: 24px 0;
+    }
+    
+    .stat-card {
+        background-color: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    
+    .stat-label {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-header" style="justify-content: flex-start;">
+    <a href="javascript:history.back()" style="color: var(--text-primary); text-decoration: none; margin-right: 16px;">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1>Edit Profile</h1>
+</div>
+
+
+<div class="profile-header">
+    <div class="profile-picture-wrapper">
+        <div class="profile-picture-large">
+            {% if user.profile.profile_picture %}
+                <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" id="profilePreview">
+            {% else %}
+                <i class="bi bi-person-fill" id="profilePreview"></i>
+            {% endif %}
+        </div>
+        <label for="profilePictureInput" class="change-picture-btn" title="Change picture">
+            <i class="bi bi-camera-fill"></i>
+        </label>
+        <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
+    </div>
+    
+    <h2 style="font-size: 24px; font-weight: 700; margin: 8px 0;">{{ user.username }}</h2>
+    <p style="color: var(--text-secondary); font-size: 15px;">@{{ user.username }}</p>
+    
+    {% if user.profile.bio %}
+        <p style="color: var(--text-primary); max-width: 400px; margin: 12px auto;">{{ user.profile.bio }}</p>
+    {% endif %}
+    
+</div>
+
+<div class="profile-form-section" style="max-width: 600px; margin: 24px auto;">
+    <h3 style="margin-bottom: 24px; font-size: 20px; font-weight: 700;">Edit Profile</h3>
+    
+    <form method="post" enctype="multipart/form-data" id="profileForm">
+        {% csrf_token %}
+        
+        <input type="file" name="profile_picture" id="hiddenProfileInput" style="display: none;">
+        
+        <div style="margin-bottom: 16px;">
+            <label class="form-label-modern">Email</label>
+            <input type="email" name="email" value="{{ user.email }}" class="form-control-modern" required>
+        </div>
+        
+        <div style="margin-bottom: 16px;">
+            <label class="form-label-modern">Department</label>
+            <select name="department" class="form-control-modern" required>
+                {% for value, label in form.department.field.choices %}
+                    <option value="{{ value }}" {% if user.profile.department == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div style="margin-bottom: 16px;">
+            <label class="form-label-modern">Level</label>
+            <select name="level" class="form-control-modern" required>
+                {% for value, label in form.level.field.choices %}
+                    <option value="{{ value }}" {% if user.profile.level == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div style="margin-bottom: 24px;">
+            <label class="form-label-modern">Bio</label>
+            <textarea name="bio" class="form-control-modern" rows="4" placeholder="Tell us about yourself...">{{ user.profile.bio }}</textarea>
+        </div>
+        
+        <button type="submit" style="width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 9999px; font-weight: 700; font-size: 17px; cursor: pointer;">
+            Save Changes
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const profilePictureInput = document.getElementById('profilePictureInput');
+const hiddenProfileInput = document.getElementById('hiddenProfileInput');
+const profilePreview = document.getElementById('profilePreview');
+
+profilePictureInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Transfer to hidden input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        hiddenProfileInput.files = dataTransfer.files;
+        
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (profilePreview.tagName === 'I') {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                profilePreview.parentElement.innerHTML = '';
+                profilePreview.parentElement.appendChild(img);
+            } else {
+                profilePreview.src = e.target.result;
+            }
+        };
+        reader.readAsDataURL(file);
+        
+        // Auto-submit or show save button
+        if (confirm('Upload this profile picture?')) {
+            document.getElementById('profileForm').submit();
+        }
+    }
+});
+</script>
+{% endblock %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="position-relative d-inline-block">
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                 style="width: 100px; height: 100px; font-size: 2.5rem; overflow: hidden;">
+                                {% if user.profile.profile_picture %}
+                                    <img src="{{ user.profile.profile_picture.url }}" 
+                                         alt="{{ user.username }}"
+                                         style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <i class="bi bi-person-circle"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <h2 class="mt-3 mb-0">{{ user.username }}</h2>
+                        <p class="text-muted">
+                            {% if user.profile.department %}
+                                {{ user.profile.get_department_display }} • {{ user.profile.get_level_display }}
+                            {% else %}
+                                Update your profile information
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <hr>
+
+                    <h4 class="mb-3">Edit Profile</h4>
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Profile Picture -->
+                        <div class="mb-3">
+                            <label for="{{ form.profile_picture.id_for_label }}" class="form-label">Profile Picture</label>
+                            {{ form.profile_picture }}
+                            {% if form.profile_picture.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.profile_picture.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">Upload a profile picture (JPG, PNG)</small>
+                        </div>
+                        
+                        <!-- Username (Read-only) -->
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" value="{{ user.username }}" disabled>
+                            <small class="text-muted">Username cannot be changed</small>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.email.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Department -->
+                        <div class="mb-3">
+                            <label for="{{ form.department.id_for_label }}" class="form-label">Department</label>
+                            {{ form.department }}
+                            {% if form.department.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.department.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Level -->
+                        <div class="mb-3">
+                            <label for="{{ form.level.id_for_label }}" class="form-label">Level</label>
+                            {{ form.level }}
+                            {% if form.level.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.level.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Bio -->
+                        <div class="mb-3">
+                            <label for="{{ form.bio.id_for_label }}" class="form-label">Bio</label>
+                            {{ form.bio }}
+                            {% if form.bio.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.bio.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">Optional. Tell others about yourself (max 200 characters)</small>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Update Profile
+                            </button>
+                            <a href="{% url 'feed' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Feed
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Account Stats Card -->
+            <div class="card shadow-sm border-0 mt-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Your Statistics</h5>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-primary mb-0">{{ total_posts }}</h3>
+                                <small class="text-muted">Posts</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-danger mb-0">{{ total_likes_received }}</h3>
+                                <small class="text-muted">Likes</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="text-success mb-0">{{ total_comments }}</h3>
+                                <small class="text-muted">Comments</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Account Info Card -->
+            <div class="card shadow-sm border-0 mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Account Information</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-calendar-check text-primary"></i> 
+                            <strong>Joined:</strong> {{ user.date_joined|date:"F j, Y" }}
+                        </li>
+                        <li>
+                            <i class="bi bi-clock-history text-primary"></i> 
+                            <strong>Last Login:</strong> {{ user.last_login|date:"F j, Y g:i A" }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

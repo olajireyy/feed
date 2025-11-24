@@ -1,0 +1,1342 @@
+{% extends 'modern_base.html' %}
+{% load feed_filters %}
+
+{% block title %}Home / CampusFeed{% endblock %}
+
+{% block extra_css %}
+<style>
+
+
+/* New Posts Banner */
+.new-posts-banner {
+    position: sticky;
+    top: 120px;
+    z-index: 98;
+    background: linear-gradient(135deg, var(--primary-color), #764ba2);
+    color: white;
+    text-align: center;
+    padding: 12px 20px;
+    border-radius: 9999px;
+    margin: 12px auto;
+    max-width: 300px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    display: none;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.new-posts-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+}
+
+.new-posts-banner.show {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* New Post Highlight Animation */
+.new-post-highlight {
+    animation: highlightFade 3s ease-out;
+}
+
+@keyframes highlightFade {
+    0% {
+        background-color: rgba(102, 126, 234, 0.15);
+        transform: translateX(-10px);
+        opacity: 0;
+    }
+    20% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Loading spinner in banner */
+.new-posts-banner .spinner-border {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+}
+
+
+    .post {
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px;
+        transition: background-color 0.2s;
+        cursor: pointer;
+    }
+    
+    .post:hover {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .post-header {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+    
+    .post-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        margin-right: 12px;
+        background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .post-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .post-avatar i {
+        color: white;
+        font-size: 24px;
+    }
+    
+    .post-author {
+        flex: 1;
+    }
+    
+    .post-author-name {
+        font-weight: 700;
+        font-size: 15px;
+    }
+    
+    .post-author-handle {
+        color: var(--text-secondary);
+        font-size: 15px;
+    }
+    
+    .post-time {
+        color: var(--text-secondary);
+        font-size: 15px;
+    }
+    
+    .post-content {
+        font-size: 15px;
+        line-height: 20px;
+        margin-bottom: 12px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    .post-media {
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 12px;
+        border: 1px solid var(--border-color);
+    }
+    
+    .post-media img, .post-media video {
+        width: 100%;
+        display: block;
+    }
+    
+    .post-media-grid {
+        display: grid;
+        gap: 4px;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .post-media-grid.one {
+        max-height: none;
+    }
+    
+    .post-media-grid.two {
+        grid-template-columns: 1fr 1fr;
+        max-height: 400px;
+    }
+    
+    .post-media-grid.three {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        max-height: 400px;
+    }
+    
+    .post-media-grid.three .media-item:first-child {
+        grid-row: 1 / 3;
+    }
+    
+    .post-media-grid.four {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        max-height: 400px;
+    }
+    
+    .media-item {
+        position: relative;
+        width: 100%;
+        min-height: 150px;
+        overflow: hidden;
+        background: var(--bg-tertiary);
+    }
+    
+    .post-media-grid.one .media-item {
+        min-height: 250px;
+        max-height: 500px;
+        height: auto;
+    }
+    
+    .post-media-grid.two .media-item {
+        height: 400px;
+    }
+    
+    .post-media-grid.three .media-item {
+        height: 100%;
+    }
+    
+    .post-media-grid.four .media-item {
+        height: 200px;
+    }
+    
+    .media-item img, .media-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+    
+    .post-media-grid.one .media-item img,
+    .post-media-grid.one .media-item video {
+        object-fit: contain;
+        height: auto;
+        max-height: 500px;
+    }
+    
+    .media-item:hover img {
+        transform: scale(1.05);
+    }
+    
+    .media-more-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        font-weight: 700;
+        color: white;
+        cursor: pointer;
+    }
+    
+    .post-actions {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .post-action-btn {
+        display: flex;
+        align-items: center;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: all 0.2s;
+        font-size: 14px;
+        font-weight: 600;
+        flex: 1;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .post-action-btn i {
+        font-size: 20px;
+    }
+    
+    .post-action-btn:hover {
+        background-color: rgba(29, 155, 240, 0.1);
+        color: var(--primary-color);
+    }
+    
+    .post-action-btn.liked {
+        color: #f91880;
+    }
+    
+    .post-action-btn.liked:hover {
+        background-color: rgba(249, 24, 128, 0.1);
+    }
+    
+    .post-action-btn.bookmarked {
+        color: #ffc107;
+    }
+    
+    .badge-category {
+        background-color: var(--bg-secondary);
+        color: var(--primary-color);
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    .anonymous-badge {
+        background-color: var(--bg-secondary);
+        color: var(--text-secondary);
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    
+    .empty-state i {
+        font-size: 64px;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+    }
+    
+    .empty-state h3 {
+        font-size: 31px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+    
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 15px;
+    }
+    
+    .category-pills {
+        position: sticky;
+        top: 73px;
+        z-index: 99;
+        display: flex;
+        gap: 8px;
+        padding: 12px 0;
+        overflow-x: auto;
+        background: rgba(10, 14, 39, 0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+        scrollbar-width: none;
+        margin: 0 -10%;
+        padding-left: 10%;
+        padding-right: 10%;
+    }
+    
+    .category-pills::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .category-pill {
+        padding: 8px 16px;
+        border-radius: 9999px;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        text-decoration: none;
+        white-space: nowrap;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    
+    .category-pill:hover {
+        background-color: var(--bg-hover);
+    }
+    
+    .category-pill.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    /* Infinite Scroll Loading Indicator */
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 12px;
+}
+
+.loading-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-indicator span {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* End of Feed Message */
+.end-of-feed {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+
+.end-of-feed i {
+    font-size: 32px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Share Modal */
+.share-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-modal-overlay.show {
+    display: flex;
+}
+
+.share-modal {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 480px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideIn 0.25s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.share-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.share-modal-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.share-modal-close {
+    background: var(--bg-tertiary);
+    border: none;
+    color: var(--text-secondary);
+    font-size: 18px;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.share-modal-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.share-search-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.share-search-box i {
+    color: var(--text-secondary);
+    font-size: 18px;
+}
+
+.share-search-box input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 15px;
+}
+
+.share-search-box input::placeholder {
+    color: var(--text-secondary);
+}
+
+.share-users-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.share-user-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.share-user-item:hover {
+    background: var(--bg-hover);
+}
+
+.share-user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.share-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.share-user-avatar i {
+    color: white;
+    font-size: 20px;
+}
+
+.share-user-info {
+    flex: 1;
+}
+
+.share-user-name {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.share-user-username {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.share-user-action {
+    color: var(--primary-color);
+    font-size: 20px;
+}
+</style>
+
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Home</h1>
+</div>
+
+<!-- Category Filter Pills -->
+<div class="category-pills">
+    <a href="{% url 'feed' %}" class="category-pill {% if category == 'all' %}active{% endif %}">
+        For You
+    </a>
+    {% for cat_value, cat_label in categories %}
+        <a href="?category={{ cat_value }}" class="category-pill {% if category == cat_value %}active{% endif %}">
+            {{ cat_label }}
+        </a>
+    {% endfor %}
+</div>
+
+<!-- New Posts Banner -->
+<div id="newPostsBanner" class="new-posts-banner" onclick="loadNewPosts()">
+    <i class="bi bi-arrow-up-circle me-2"></i>
+    <span id="newPostsText">New posts</span>
+</div>
+
+<!-- Posts Feed -->
+<div id="postsContainer">
+    {% for post in posts %}
+        <article class="post" data-post-id="{{ post.id }}" data-timestamp="{{ post.created_at.isoformat }}">
+            <div class="post-header">
+                <div class="post-avatar" onclick="window.location.href='{% url 'public_profile' post.author %}'">
+                    {% if post.author.profile.profile_picture and not post.is_anonymous %}
+                        <img src="{{ post.author.profile.profile_picture.url }}" alt="{{ post.get_author_display }}">
+                    {% else %}
+                        <i class="bi bi-person-fill"></i>
+                    {% endif %}
+                </div>
+                
+                <div class="post-author">
+                    <div>
+                        <span class="post-author-name" onclick="window.location.href='{% url 'public_profile' post.author %}'">
+                            {{ post.get_author_display }}
+                            {% if post.is_anonymous %}
+                                <i class="bi bi-incognito" style="color: var(--text-secondary); margin-left: 4px;" title="Anonymous"></i>
+                            {% endif %}
+                        </span>
+                        {% if not post.is_anonymous and post.author.profile.department %}
+                            <span class="post-author-handle"> • {{ post.author.profile.get_level_display }}</span>
+                        {% endif %}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                        <span class="badge-category">{{ post.get_category_display }}</span>
+                        <span class="post-time">{{ post.created_at|smart_time }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="post-content" onclick="window.location.href='{% url 'post_detail' post.id %}'">{{ post.get_content_with_hashtag_links|safe }}</div>
+            
+            <!-- Post Media -->
+            {% if post.image or post.video or post.images.all %}
+                <div class="post-media">
+                    {% if post.images.all %}
+                        {% with images=post.images.all %}
+                            {% with count=images|length %}
+                                <div class="post-media-grid {% if count == 1 %}one{% elif count == 2 %}two{% elif count == 3 %}three{% elif count >= 4 %}four{% endif %}">
+                                    {% for img in images|slice:":4" %}
+                                        <div class="media-item" onclick="viewImage('{{ img.image.url }}')">
+                                            <img src="{{ img.image.url }}" alt="Post image">
+                                            {% if forloop.last and count > 4 %}
+                                                <div class="media-more-overlay">
+                                                    +{{ count|add:"-4" }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endwith %}
+                        {% endwith %}
+                    {% elif post.image %}
+                        <div class="post-media-grid one">
+                            <div class="media-item" onclick="viewImage('{{ post.image.url }}')">
+                                <img src="{{ post.image.url }}" alt="Post image">
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if post.video %}
+                        <div style="margin-top: {% if post.images.all or post.image %}8px{% else %}0{% endif %};">
+                            <video controls style="width: 100%; max-height: 500px; border-radius: 16px;">
+                                <source src="{{ post.video.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+            
+            <!-- Post Actions -->
+             
+            <div class="post-actions">
+                <button class="post-action-btn comment-btn" data-post-id="{{ post.id }}" onclick="window.location.href='{% url 'post_detail' post.id %}'">
+                    <i class="bi bi-chat"></i>
+                    <span>{{ post.comments_count }}</span>
+                </button>
+               
+                <button class="post-action-btn {% if post.id in liked_post_ids %}liked{% endif %}" 
+                        onclick="toggleLike({{ post.id }}, event)">
+                    <i class="bi bi-heart{% if post.id in liked_post_ids %}-fill{% endif %}"></i>
+                    <span class="like-count">{{ post.likes_count }}</span>
+                </button>
+                
+                <button class="post-action-btn {% if post.id in bookmarked_post_ids %}bookmarked{% endif %}" 
+                        onclick="toggleBookmark({{ post.id }}, event)">
+                    <i class="bi bi-bookmark{% if post.id in bookmarked_post_ids %}-fill{% endif %}"></i>
+                </button>
+                
+                <button class="post-action-btn" onclick="sharePost({{ post.id }}, event)">
+                    <i class="bi bi-share"></i>
+                    <span>{{ post.shares_count }}</span>
+                </button>
+            </div>
+        </article>
+    {% empty %}
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h3>No posts yet</h3>
+            <p>Be the first to share something with your campus!</p>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Load More -->
+{% if posts.has_next %}
+    <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+    <div class="loading-spinner"></div>
+    <span>Loading more posts...</span>
+</div>
+
+<!-- End of Feed Message (hidden by default) -->
+<div id="endOfFeed" class="end-of-feed" style="display: none;">
+    <i class="bi bi-check-circle"></i>
+    <p>You've reached the end!</p>
+</div>
+
+<!-- Scroll Sentinel (invisible element to detect scroll) -->
+<div id="scrollSentinel" style="height: 1px;"></div>
+
+
+{% endif %}
+{% endblock %}
+
+<!-- Image Viewer Modal -->
+<div id="imageModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 9999; display: flex; align-items: center; justify-content: center;" onclick="closeImageModal()">
+    <button onclick="closeImageModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 24px;">×</button>
+    <img id="modalImage" src="" style="max-width: 90%; max-height: 90%; object-fit: contain;">
+</div>
+
+
+<!-- Share Post Modal -->
+<div class="share-modal-overlay" id="shareModalOverlay" onclick="closeShareModal()">
+    <div class="share-modal" onclick="event.stopPropagation()">
+        <div class="share-modal-header">
+            <h3>Share via Direct Message</h3>
+            <button class="share-modal-close" onclick="closeShareModal()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        
+        <div class="share-search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="shareSearchInput" placeholder="Search people..." autocomplete="off">
+        </div>
+        
+        <div class="share-users-list" id="shareUsersList">
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                <i class="bi bi-people" style="font-size: 48px; display: block; margin-bottom: 12px;"></i>
+                <p>Search for someone to share with</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Share Post System
+let currentSharePostId = null;
+
+async function sharePost(postId, event) {
+    event.stopPropagation();
+    currentSharePostId = postId;
+    
+    const overlay = document.getElementById('shareModalOverlay');
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    
+    // Load recent conversations
+    try {
+        const response = await fetch(`/posts/${postId}/share-dm/`);
+        const data = await response.json();
+        
+        if (data.success && data.users.length > 0) {
+            displayShareUsers(data.users);
+        } else {
+            // Show empty state
+            document.getElementById('shareUsersList').innerHTML = `
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <i class="bi bi-people" style="font-size: 48px; display: block; margin-bottom: 12px;"></i>
+                    <p>No recent conversations. Search for someone to share with.</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading users:', error);
+        document.getElementById('shareUsersList').innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                <i class="bi bi-exclamation-circle" style="font-size: 48px; display: block; margin-bottom: 12px;"></i>
+                <p>Error loading users. Please try again.</p>
+            </div>
+        `;
+    }
+    
+    setTimeout(() => {
+        document.getElementById('shareSearchInput').focus();
+    }, 100);
+}
+
+function closeShareModal() {
+    const overlay = document.getElementById('shareModalOverlay');
+    overlay.classList.remove('show');
+    document.body.style.overflow = 'auto';
+    document.getElementById('shareSearchInput').value = '';
+    document.getElementById('shareUsersList').innerHTML = `
+        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+            <i class="bi bi-people" style="font-size: 48px; display: block; margin-bottom: 12px;"></i>
+            <p>Search for someone to share with</p>
+        </div>
+    `;
+    currentSharePostId = null;
+}
+
+function displayShareUsers(users) {
+    const container = document.getElementById('shareUsersList');
+    
+    if (users.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                <i class="bi bi-inbox" style="font-size: 48px; display: block; margin-bottom: 12px;"></i>
+                <p>No recent conversations</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = users.map(user => `
+        <div class="share-user-item" onclick="sharePostToUser('${escapeHtml(user.username)}')">
+            <div class="share-user-avatar">
+                ${user.profile_picture 
+                    ? `<img src="${user.profile_picture}" alt="${escapeHtml(user.username)}">`
+                    : '<i class="bi bi-person-fill"></i>'
+                }
+            </div>
+            <div class="share-user-info">
+                <div class="share-user-name">${escapeHtml(user.name || user.username)}</div>
+                <div class="share-user-username">@${escapeHtml(user.username)}</div>
+            </div>
+            <i class="bi bi-send-fill share-user-action"></i>
+        </div>
+    `).join('');
+}
+
+async function sharePostToUser(username) {
+    if (!currentSharePostId) return;
+    
+    try {
+        const formData = new FormData();
+        formData.append('username', username);
+        
+        const response = await fetch(`/posts/${currentSharePostId}/share-dm/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            closeShareModal();
+            showNotification(`Post shared with @${username}! 📤`);
+            
+            // Update share count on the post
+            const shareBtn = document.querySelector(`[onclick*="sharePost(${currentSharePostId}"]`);
+            if (shareBtn) {
+                const shareCount = shareBtn.querySelector('span');
+                if (shareCount) {
+                    shareCount.textContent = parseInt(shareCount.textContent || 0) + 1;
+                }
+            }
+        } else {
+            alert(data.error || 'Failed to share post');
+        }
+    } catch (error) {
+        console.error('Error sharing post:', error);
+        alert('Failed to share post. Please try again.');
+    }
+}
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border-color);
+        z-index: 10000;
+        animation: slideUpFade 0.3s ease-out;
+        font-weight: 600;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideDownFade 0.3s ease-out';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+    }, 2500);
+}
+
+// Search users in share modal
+const shareSearchInput = document.getElementById('shareSearchInput');
+let shareSearchTimeout;
+
+shareSearchInput?.addEventListener('input', async (e) => {
+    clearTimeout(shareSearchTimeout);
+    const query = e.target.value.trim();
+    
+    if (query.length < 2) {
+        // Load recent conversations again
+        if (currentSharePostId) {
+            try {
+                const response = await fetch(`/posts/${currentSharePostId}/share-dm/`);
+                const data = await response.json();
+                if (data.success) {
+                    displayShareUsers(data.users);
+                }
+            } catch (error) {
+                console.error('Error loading recent conversations:', error);
+            }
+        }
+        return;
+    }
+    
+    // Show loading state
+    document.getElementById('shareUsersList').innerHTML = `
+        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+            <div class="loading-spinner" style="margin: 0 auto 12px;"></div>
+            <p>Searching...</p>
+        </div>
+    `;
+    
+    shareSearchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/messages/search-users/?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            displayShareUsers(data.users);
+        } catch (error) {
+            console.error('Search error:', error);
+            document.getElementById('shareUsersList').innerHTML = `
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <i class="bi bi-exclamation-circle" style="font-size: 48px; display: block; margin-bottom: 12px;"></i>
+                    <p>Error searching users. Please try again.</p>
+                </div>
+            `;
+        }
+    }, 300);
+});
+
+// Close modal on escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('shareModalOverlay').classList.contains('show')) {
+        closeShareModal();
+    }
+});
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideUpFade {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+    
+    @keyframes slideDownFade {
+        from {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+<script>
+// Infinite Scroll System
+const InfiniteScroll = {
+    currentPage: 1,
+    isLoading: false,
+    hasMore: {{ posts.has_next|yesno:"true,false" }},
+    category: '{{ category }}',
+    searchQuery: '{{ search_query|escapejs }}',
+    observer: null,
+    
+    init() {
+        if (!this.hasMore) {
+            document.getElementById('endOfFeed').style.display = 'block';
+            return;
+        }
+        
+        // Use Intersection Observer to detect when user scrolls near bottom
+        this.observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !this.isLoading && this.hasMore) {
+                    this.loadMore();
+                }
+            });
+        }, {
+            rootMargin: '200px' // Start loading 200px before reaching the sentinel
+        });
+        
+        const sentinel = document.getElementById('scrollSentinel');
+        if (sentinel) {
+            this.observer.observe(sentinel);
+        }
+    },
+    
+    async loadMore() {
+        if (this.isLoading || !this.hasMore) return;
+        
+        this.isLoading = true;
+        this.showLoading();
+        
+        try {
+            const nextPage = this.currentPage + 1;
+            const params = new URLSearchParams({
+                page: nextPage,
+                category: this.category,
+                q: this.searchQuery
+            });
+            
+            const response = await fetch(`/api/posts/load-more/?${params}`);
+            const data = await response.json();
+            
+            if (data.html) {
+                const container = document.getElementById('postsContainer');
+                container.insertAdjacentHTML('beforeend', data.html);
+                
+                this.currentPage = nextPage;
+                this.hasMore = data.has_next;
+                
+                // Update the lastCheck for FeedRefresh if it exists
+                if (typeof FeedRefresh !== 'undefined') {
+                    const firstPost = document.querySelector('.post[data-timestamp]');
+                    if (firstPost) {
+                        FeedRefresh.lastCheck = firstPost.dataset.timestamp;
+                    }
+                }
+            }
+            
+            if (!this.hasMore) {
+                document.getElementById('endOfFeed').style.display = 'block';
+                if (this.observer) {
+                    this.observer.disconnect();
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error loading more posts:', error);
+        } finally {
+            this.isLoading = false;
+            this.hideLoading();
+        }
+    },
+    
+    showLoading() {
+        document.getElementById('loadingIndicator').style.display = 'flex';
+    },
+    
+    hideLoading() {
+        document.getElementById('loadingIndicator').style.display = 'none';
+    }
+};
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    InfiniteScroll.init();
+});
+</script>
+<script>
+// Feed Refresh System
+const FeedRefresh = {
+    checkInterval: 30000,  // 30 seconds
+    category: '{{ category }}',
+    lastCheck: null,
+    newPostsCount: 0,
+    intervalId: null,
+    
+    init() {
+        // Get timestamp from first post or use current time
+        const firstPost = document.querySelector('.post[data-timestamp]');
+        this.lastCheck = firstPost ? firstPost.dataset.timestamp : new Date().toISOString();
+        
+        // Start polling
+        this.startPolling();
+        
+        // Check when tab becomes visible again
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.checkForNewPosts();
+            }
+        });
+    },
+    
+    startPolling() {
+        this.intervalId = setInterval(() => this.checkForNewPosts(), this.checkInterval);
+    },
+    
+    async checkForNewPosts() {
+        try {
+            const params = new URLSearchParams({
+                since: this.lastCheck,
+                category: this.category
+            });
+            
+            const response = await fetch(`/api/posts/check-new/?${params}`);
+            const data = await response.json();
+            
+            if (data.new_count > 0) {
+                this.newPostsCount = data.new_count;
+                this.showBanner();
+            }
+        } catch (error) {
+            console.error('Error checking for new posts:', error);
+        }
+    },
+    
+    showBanner() {
+        const banner = document.getElementById('newPostsBanner');
+        const text = document.getElementById('newPostsText');
+        const postWord = this.newPostsCount === 1 ? 'post' : 'posts';
+        
+        text.textContent = `${this.newPostsCount} new ${postWord} available`;
+        banner.classList.add('show');
+    },
+    
+    hideBanner() {
+        const banner = document.getElementById('newPostsBanner');
+        banner.classList.remove('show');
+        this.newPostsCount = 0;
+    },
+    
+    async loadNewPosts() {
+        const banner = document.getElementById('newPostsBanner');
+        const text = document.getElementById('newPostsText');
+        
+        // Show loading state
+        text.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Loading...';
+        
+        try {
+            const params = new URLSearchParams({
+                since: this.lastCheck,
+                category: this.category
+            });
+            
+            const response = await fetch(`/api/posts/load-new/?${params}`);
+            const data = await response.json();
+            
+            if (data.html && data.count > 0) {
+                const container = document.getElementById('postsContainer');
+                
+                // Insert new posts at the top
+                container.insertAdjacentHTML('afterbegin', data.html);
+                
+                // Update timestamp
+                this.lastCheck = data.latest_timestamp || new Date().toISOString();
+                
+                // Remove highlight class after animation
+                setTimeout(() => {
+                    document.querySelectorAll('.new-post-highlight').forEach(post => {
+                        post.classList.remove('new-post-highlight');
+                    });
+                }, 3000);
+                
+                // Scroll to top smoothly
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            this.hideBanner();
+            
+        } catch (error) {
+            console.error('Error loading new posts:', error);
+            text.textContent = 'Error loading. Tap to retry.';
+        }
+    }
+};
+
+// Global function for onclick
+function loadNewPosts() {
+    FeedRefresh.loadNewPosts();
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    FeedRefresh.init();
+});
+</script>
+
+<script>
+function viewImage(url) {
+    event.stopPropagation();
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    modal.style.display = 'flex';
+    modalImg.src = url;
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+</script>
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+async function toggleLike(postId, event) {
+    event.stopPropagation();
+    const btn = event.currentTarget;
+    const icon = btn.querySelector('i');
+    const count = btn.querySelector('.like-count');
+    
+    try {
+        const response = await fetch(`/posts/${postId}/like/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            if (data.liked) {
+                btn.classList.add('liked');
+                icon.classList.remove('bi-heart');
+                icon.classList.add('bi-heart-fill');
+            } else {
+                btn.classList.remove('liked');
+                icon.classList.remove('bi-heart-fill');
+                icon.classList.add('bi-heart');
+            }
+            count.textContent = data.likes_count;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+async function toggleBookmark(postId, event) {
+    event.stopPropagation();
+    const btn = event.currentTarget;
+    const icon = btn.querySelector('i');
+    
+    try {
+        const response = await fetch(`/posts/${postId}/bookmark/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            if (data.bookmarked) {
+                btn.classList.add('bookmarked');
+                icon.classList.remove('bi-bookmark');
+                icon.classList.add('bi-bookmark-fill');
+            } else {
+                btn.classList.remove('bookmarked');
+                icon.classList.remove('bi-bookmark-fill');
+                icon.classList.add('bi-bookmark');
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+async function sharePost(postId, event) {
+    event.stopPropagation();
+    
+    try {
+        const response = await fetch(`/posts/${postId}/share/`, {
+            method: 'GET',
+            headers: { 'X-CSRFToken': csrftoken }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            if (navigator.share) {
+                await navigator.share({
+                    title: 'CampusFeed Post',
+                    url: data.url
+                });
+            } else {
+                await navigator.clipboard.writeText(data.url);
+                alert('Link copied to clipboard! 📋');
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+</script>
+{% endblock %}

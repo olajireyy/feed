@@ -1,0 +1,93 @@
+{% load feed_filters %}
+
+{% for post in posts %}
+<article class="post" data-post-id="{{ post.id }}" data-timestamp="{{ post.created_at.isoformat }}">
+    <div class="post-header">
+        <div class="post-avatar" onclick="window.location.href='{% url 'public_profile' post.author %}'">
+            {% if post.author.profile.profile_picture and not post.is_anonymous %}
+                <img src="{{ post.author.profile.profile_picture.url }}" alt="{{ post.get_author_display }}">
+            {% else %}
+                <i class="bi bi-person-fill"></i>
+            {% endif %}
+        </div>
+        
+        <div class="post-author">
+            <div>
+                <span class="post-author-name" onclick="window.location.href='{% url 'public_profile' post.author %}'">
+                    {{ post.get_author_display }}
+                    {% if post.is_anonymous %}
+                        <i class="bi bi-incognito" style="color: var(--text-secondary); margin-left: 4px;" title="Anonymous"></i>
+                    {% endif %}
+                </span>
+                {% if not post.is_anonymous and post.author.profile.department %}
+                    <span class="post-author-handle"> • {{ post.author.profile.get_level_display }}</span>
+                {% endif %}
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                <span class="badge-category">{{ post.get_category_display }}</span>
+                <span class="post-time">{{ post.created_at|smart_time }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="post-content" onclick="window.location.href='{% url 'post_detail' post.id %}'">{{ post.get_content_with_hashtag_links|safe }}</div>
+    
+    {% if post.image or post.video or post.images.all %}
+        <div class="post-media">
+            {% if post.images.all %}
+                {% with images=post.images.all %}
+                    {% with count=images|length %}
+                        <div class="post-media-grid {% if count == 1 %}one{% elif count == 2 %}two{% elif count == 3 %}three{% elif count >= 4 %}four{% endif %}">
+                            {% for img in images|slice:":4" %}
+                                <div class="media-item" onclick="viewImage('{{ img.image.url }}')">
+                                    <img src="{{ img.image.url }}" alt="Post image">
+                                    {% if forloop.last and count > 4 %}
+                                        <div class="media-more-overlay">+{{ count|add:"-4" }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endwith %}
+                {% endwith %}
+            {% elif post.image %}
+                <div class="post-media-grid one">
+                    <div class="media-item" onclick="viewImage('{{ post.image.url }}')">
+                        <img src="{{ post.image.url }}" alt="Post image">
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if post.video %}
+                <div style="margin-top: {% if post.images.all or post.image %}8px{% else %}0{% endif %};">
+                    <video controls style="width: 100%; max-height: 500px; border-radius: 16px;">
+                        <source src="{{ post.video.url }}" type="video/mp4">
+                    </video>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    <div class="post-actions">
+        <button class="post-action-btn comment-btn" onclick="window.location.href='{% url 'post_detail' post.id %}'">
+            <i class="bi bi-chat"></i>
+            <span>{{ post.comments_count }}</span>
+        </button>
+       
+        <button class="post-action-btn {% if post.id in liked_post_ids %}liked{% endif %}" 
+                onclick="toggleLike({{ post.id }}, event)">
+            <i class="bi bi-heart{% if post.id in liked_post_ids %}-fill{% endif %}"></i>
+            <span class="like-count">{{ post.likes_count }}</span>
+        </button>
+        
+        <button class="post-action-btn {% if post.id in bookmarked_post_ids %}bookmarked{% endif %}" 
+                onclick="toggleBookmark({{ post.id }}, event)">
+            <i class="bi bi-bookmark{% if post.id in bookmarked_post_ids %}-fill{% endif %}"></i>
+        </button>
+        
+        <button class="post-action-btn" onclick="sharePost({{ post.id }}, event)">
+            <i class="bi bi-share"></i>
+            <span>{{ post.shares_count }}</span>
+        </button>
+    </div>
+</article>
+{% endfor %}

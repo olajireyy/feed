@@ -1,0 +1,417 @@
+{% extends 'general_base.html' %}
+
+{% block title %}Create Post / CampusFeed{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-post-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .create-header {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .create-header .close-btn {
+        background: none;
+        border: none;
+        color: var(--text-primary);
+        font-size: 20px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+    
+    .create-header .close-btn:hover {
+        background-color: var(--bg-hover);
+    }
+    
+    .create-header h1 {
+        flex: 1;
+        text-align: center;
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .create-header .post-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 9999px;
+        padding: 8px 24px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 15px;
+    }
+    
+    .create-header .post-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .create-body {
+        padding: 16px;
+    }
+    
+    .user-info {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+    
+    .user-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        overflow: hidden;
+    }
+    
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .user-avatar i {
+        color: white;
+        font-size: 24px;
+    }
+    
+    .compose-area {
+        flex: 1;
+    }
+    
+    .content-input {
+        width: 100%;
+        background: none;
+        border: none;
+        color: var(--text-primary);
+        font-size: 20px;
+        resize: none;
+        min-height: 120px;
+        outline: none;
+        font-family: inherit;
+    }
+    
+    .content-input::placeholder {
+        color: var(--text-secondary);
+    }
+    
+    .media-preview {
+        margin-top: 16px;
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .media-preview-item {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        aspect-ratio: 16/9;
+    }
+    
+    .media-preview-item img, .media-preview-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .remove-media {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: rgba(0, 0, 0, 0.75);
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+    }
+    
+    .media-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 0;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .media-btn {
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        font-size: 20px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+    
+    .media-btn:hover {
+        background-color: rgba(29, 155, 240, 0.1);
+    }
+    
+    .form-select-modern {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 10px;
+        cursor: pointer;
+       width: 30%;
+    }
+    
+    .form-check-modern {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background-color: var(--bg-secondary);
+        border-radius: 8px;
+        cursor: pointer;
+         width: 30%;
+    }
+    
+    .form-check-modern input {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    
+    .form-check-modern label {
+        cursor: pointer;
+        font-size: 10px;
+        margin: 0;
+        
+    }
+    
+    .options-section {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 16px;
+    }
+    .post-btn{
+        width: 17%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-post-container">
+    <div class="create-header">
+        <button class="close-btn" onclick="window.location.href='{% url 'feed' %}'">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <h1>Create Post</h1>
+        <button class="post-btn" id="submitBtn" disabled>Post</button>
+    </div>
+    
+    <form id="createPostForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="create-body">
+            <div class="user-info">
+                <div class="user-avatar">
+                    {% if user.profile.profile_picture %}
+                        <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}">
+                    {% else %}
+                        <i class="bi bi-person-fill"></i>
+                    {% endif %}
+                </div>
+                
+                <div class="compose-area">
+                    <textarea 
+                        name="content" 
+                        class="content-input" 
+                        placeholder="What's happening on campus?"
+                        id="contentInput"
+                        required
+                    ></textarea>
+                    
+                    <div id="mediaPreview" class="media-preview"></div>
+                    
+                    <div class="options-section">
+                        <select name="category" class="form-select-modern" required>
+                            <option value="">Select Category</option>
+                            {% for value, label in form.category.field.choices %}
+                                {% if value %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        
+                        <div class="form-check-modern">
+                            <input type="checkbox" name="is_anonymous" id="anonymousCheck">
+                            <label for="anonymousCheck">Post anonymously</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="media-actions">
+                <input type="file" id="imageInput" name="images" accept="image/*" multiple style="display: none;">
+                <input type="file" id="videoInput" name="video" accept="video/*" style="display: none;">
+                
+                <button type="button" class="media-btn" onclick="document.getElementById('imageInput').click()">
+                    <i class="bi bi-image"></i>
+                </button>
+                
+                <button type="button" class="media-btn" onclick="document.getElementById('videoInput').click()">
+                    <i class="bi bi-play-btn"></i>
+                </button>
+                
+                <button type="button" class="media-btn" onclick="insertEmoji('😊')">
+                    <i class="bi bi-emoji-smile"></i>
+                </button>
+                
+                <button type="button" class="media-btn" title="Add hashtag" onclick="insertHashtag()">
+                    <i class="bi bi-hash"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const contentInput = document.getElementById('contentInput');
+const submitBtn = document.getElementById('submitBtn');
+const form = document.getElementById('createPostForm');
+const imageInput = document.getElementById('imageInput');
+const videoInput = document.getElementById('videoInput');
+const mediaPreview = document.getElementById('mediaPreview');
+
+let selectedImages = [];
+let selectedVideo = null;
+
+// Enable submit button when there's content
+contentInput.addEventListener('input', () => {
+    submitBtn.disabled = contentInput.value.trim().length === 0;
+});
+
+// Handle image selection
+imageInput.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files);
+    selectedImages = files.slice(0, 4); // Max 4 images
+    displayMediaPreview();
+});
+
+// Handle video selection
+videoInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        selectedVideo = e.target.files[0];
+        selectedImages = []; // Clear images if video is selected
+        displayMediaPreview();
+    }
+});
+
+function displayMediaPreview() {
+    mediaPreview.innerHTML = '';
+    
+    if (selectedVideo) {
+        const videoElement = document.createElement('div');
+        videoElement.className = 'media-preview-item';
+        videoElement.style.gridColumn = '1 / -1';
+        
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(selectedVideo);
+        video.controls = true;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-media';
+        removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+        removeBtn.onclick = () => {
+            selectedVideo = null;
+            videoInput.value = '';
+            displayMediaPreview();
+        };
+        
+        videoElement.appendChild(video);
+        videoElement.appendChild(removeBtn);
+        mediaPreview.appendChild(videoElement);
+    } else {
+        selectedImages.forEach((file, index) => {
+            const imgElement = document.createElement('div');
+            imgElement.className = 'media-preview-item';
+            
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-media';
+            removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+            removeBtn.onclick = () => {
+                selectedImages.splice(index, 1);
+                displayMediaPreview();
+                
+                // Update file input
+                const dt = new DataTransfer();
+                selectedImages.forEach(file => dt.items.add(file));
+                imageInput.files = dt.files;
+            };
+            
+            imgElement.appendChild(img);
+            imgElement.appendChild(removeBtn);
+            mediaPreview.appendChild(imgElement);
+        });
+    }
+}
+
+function insertEmoji(emoji) {
+    const start = contentInput.selectionStart;
+    const end = contentInput.selectionEnd;
+    const text = contentInput.value;
+    contentInput.value = text.substring(0, start) + emoji + text.substring(end);
+    contentInput.focus();
+    contentInput.selectionStart = contentInput.selectionEnd = start + emoji.length;
+    submitBtn.disabled = false;
+}
+
+function insertHashtag() {
+    const start = contentInput.selectionStart;
+    const end = contentInput.selectionEnd;
+    const text = contentInput.value;
+    const hashtag = '#';
+    contentInput.value = text.substring(0, start) + hashtag + text.substring(end);
+    contentInput.focus();
+    contentInput.selectionStart = contentInput.selectionEnd = start + 1;
+    submitBtn.disabled = false;
+}
+
+// Submit form
+submitBtn.addEventListener('click', () => {
+    if (contentInput.value.trim().length > 0) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Posting...';
+        form.submit();
+    }
+});
+
+// Character counter (optional)
+contentInput.addEventListener('input', () => {
+    const length = contentInput.value.length;
+    if (length > 280) {
+        contentInput.value = contentInput.value.substring(0, 280);
+    }
+});
+</script>
+{% endblock %}

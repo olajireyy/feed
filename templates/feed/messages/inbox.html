@@ -1,0 +1,364 @@
+{% extends 'general_base.html' %}
+
+{% block title %}Messages / CampusFeed{% endblock %}
+
+{% block extra_css %}
+<style>
+    .messages-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .messages-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        background: rgba(10, 14, 39, 0.95);
+        backdrop-filter: blur(20px);
+        z-index: 10;
+    }
+    
+    .messages-header h1 {
+        font-size: 20px;
+        font-weight: 800;
+        margin: 0;
+    }
+    
+    .new-message-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    
+    .new-message-btn:hover {
+        transform: scale(1.1);
+    }
+    
+    .search-users-box {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .search-users-input {
+        width: 100%;
+        padding: 12px 16px;
+        padding-left: 44px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 9999px;
+        color: var(--text-primary);
+        font-size: 15px;
+        outline: none;
+        transition: all 0.2s;
+    }
+    
+    .search-users-input:focus {
+        border-color: var(--accent-purple);
+    }
+    
+    .search-users-wrapper {
+        position: relative;
+    }
+    
+    .search-users-wrapper i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+    }
+    
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-top: 8px;
+        max-height: 300px;
+        overflow-y: auto;
+        display: none;
+        z-index: 100;
+    }
+    
+    .search-results.show {
+        display: block;
+    }
+    
+    .search-result-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        color: var(--text-primary);
+    }
+    
+    .search-result-item:hover {
+        background: var(--bg-hover);
+    }
+    
+    .conversation-item {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        color: var(--text-primary);
+    }
+    
+    .conversation-item:hover {
+        background: var(--bg-hover);
+    }
+    
+    .conversation-item.unread {
+        background: rgba(139, 92, 246, 0.05);
+    }
+    
+    .conversation-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .conversation-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .conversation-avatar i {
+        color: white;
+        font-size: 24px;
+    }
+    
+    .conversation-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .conversation-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+    
+    .conversation-name {
+        font-weight: 700;
+        font-size: 15px;
+    }
+    
+    .conversation-time {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+    
+    .conversation-preview {
+        font-size: 14px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .conversation-preview.unread {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+    
+    .unread-badge {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    
+    .empty-state i {
+        font-size: 64px;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+    }
+    
+    .empty-state h3 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    
+    .empty-state p {
+        color: var(--text-secondary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="messages-container">
+    <div class="messages-header">
+        <h1>Messages</h1>
+        <button class="new-message-btn" onclick="document.getElementById('searchUsersInput').focus()">
+            <i class="bi bi-pencil-square"></i>
+        </button>
+    </div>
+    
+    <!-- Search Users -->
+    <div class="search-users-box">
+        <div class="search-users-wrapper">
+            <i class="bi bi-search"></i>
+            <input type="text" 
+                   class="search-users-input" 
+                   id="searchUsersInput"
+                   placeholder="Search for people"
+                   autocomplete="off">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+    
+    <!-- Conversations List -->
+    <div id="conversationsList">
+        {% for conv in conversations %}
+            {% with other=conv.other_user %}
+            <a href="{% url 'conversation' other.username %}" class="conversation-item {% if conv.unread_count > 0 %}unread{% endif %}">
+                <div class="conversation-avatar">
+                    {% if other.profile.profile_picture %}
+                        <img src="{{ other.profile.profile_picture.url }}" alt="{{ other.username }}">
+                    {% else %}
+                        <i class="bi bi-person-fill"></i>
+                    {% endif %}
+                </div>
+                <div class="conversation-info">
+                    <div class="conversation-top">
+                        <span class="conversation-name">{{ other.username }}</span>
+                        {% if conv.last_message %}
+                            <span class="conversation-time">{{ conv.last_message.created_at|timesince }} ago</span>
+                        {% endif %}
+                    </div>
+                    <div class="conversation-preview {% if conv.unread_count > 0 %}unread{% endif %}">
+                        {% if conv.last_message %}
+                            {% if conv.last_message.message_type == 'IMAGE' %}
+                                <i class="bi bi-image"></i> Photo
+                            {% elif conv.last_message.message_type == 'VIDEO' %}
+                                <i class="bi bi-play-circle"></i> Video
+                            {% elif conv.last_message.message_type == 'VOICE' %}
+                                <i class="bi bi-mic"></i> Voice message
+                            {% elif conv.last_message.message_type == 'POST' %}
+                                <i class="bi bi-share"></i> Shared a post
+                            {% else %}
+                                {{ conv.last_message.content|truncatechars:40 }}
+                            {% endif %}
+                        {% else %}
+                            <span style="font-style: italic;">No messages yet</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if conv.unread_count > 0 %}
+                    <span class="unread-badge">{{ conv.unread_count }}</span>
+                {% endif %}
+            </a>
+            {% endwith %}
+        {% empty %}
+            <div class="empty-state">
+                <i class="bi bi-chat-dots"></i>
+                <h3>No messages yet</h3>
+                <p>Search for someone to start a conversation</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const searchInput = document.getElementById('searchUsersInput');
+const searchResults = document.getElementById('searchResults');
+let searchTimeout;
+
+searchInput.addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    const query = e.target.value.trim();
+    
+    if (query.length < 2) {
+        searchResults.classList.remove('show');
+        return;
+    }
+    
+    searchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/messages/search-users/?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            
+            if (data.users.length > 0) {
+                searchResults.innerHTML = data.users.map(user => `
+                    <a href="/messages/${user.username}/" class="search-result-item">
+                        <div class="conversation-avatar" style="width: 44px; height: 44px; margin-right: 12px;">
+                            ${user.profile_picture 
+                                ? `<img src="${user.profile_picture}" alt="${user.username}">`
+                                : '<i class="bi bi-person-fill" style="font-size: 20px;"></i>'
+                            }
+                        </div>
+                        <div>
+                            <div style="font-weight: 600;">${user.name}</div>
+                            <div style="font-size: 13px; color: var(--text-secondary);">@${user.username}</div>
+                        </div>
+                    </a>
+                `).join('');
+                searchResults.classList.add('show');
+            } else {
+                searchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-secondary);">No users found</div>';
+                searchResults.classList.add('show');
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+        }
+    }, 300);
+});
+
+// Close search results when clicking outside
+document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+        searchResults.classList.remove('show');
+    }
+});
+</script>
+{% endblock %}
