@@ -1,784 +1,880 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}CampusFeed{% endblock %}</title>
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %} {% endblock %}</title>
+
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+
     <!-- Custom CSS -->
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --bg-primary: #0a0e27;
-            --bg-secondary: #151932;
-            --bg-tertiary: #1e2139;
-            --bg-hover: #252945;
-            --border-color: #2a2f4f;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a6c5;
-            --accent-purple: #8b5cf6;
-            --accent-pink: #ec4899;
-            --accent-blue: #3b82f6;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            overflow-x: hidden;
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            height: 100vh;
-            width: 280px;
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border-color);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            z-index: 1000;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .sidebar.collapsed {
-            transform: translateX(-280px);
-        }
-        
-        /* Sidebar Toggle */
-        .sidebar-toggle {
-            position: fixed;
-            left: 20px;
-            top: 20px;
-            width: 48px;
-            height: 48px;
-            background: var(--primary-gradient);
-            border: none;
-            border-radius: 12px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 1001;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s;
-            overflow: hidden;
-        }
-        
-        .sidebar-toggle.has-avatar {
-            padding: 0;
-        }
-        
-        .sidebar-toggle img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .sidebar-toggle i {
-            color: white;
-            font-size: 24px;
-        }
-        
-        .sidebar-toggle:hover {
-            transform: scale(1.05);
-        }
-        
-        /* App Logo (Outside Sidebar) */
-        .app-logo-fixed {
-            position: fixed;
-            left: 80px;
-            top: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 999;
-        }
-        
-        .app-logo-fixed i {
-            font-size: 32px;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .app-logo-fixed span {
-            font-size: 24px;
-            font-weight: 800;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .sidebar-logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 32px;
-            padding: 12px;
-            background: var(--primary-gradient);
-            border-radius: 16px;
-        }
-        
-        .sidebar-logo i {
-            font-size: 32px;
-            color: white;
-        }
-        
-        .sidebar-logo span {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(to right, #fff, #e0e7ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .sidebar-nav {
-            flex: 1;
-        }
-        
-        .nav-item {
-            margin-bottom: 8px;
-        }
-        
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 14px 16px;
-            border-radius: 12px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .nav-link::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--primary-gradient);
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        
-        .nav-link:hover::before {
-            opacity: 0.1;
-        }
-        
-        .nav-link:hover {
-            color: var(--text-primary);
-            transform: translateX(4px);
-        }
-        
-        .nav-link.active {
-            color: var(--text-primary);
-            background: var(--bg-hover);
-        }
-        
-        .nav-link.active::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 60%;
-            background: var(--primary-gradient);
-            border-radius: 0 4px 4px 0;
-        }
-        
-        .nav-link i {
-            font-size: 22px;
-            margin-right: 16px;
-            width: 22px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .nav-link span {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .post-btn {
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 16px;
-            font-size: 17px;
-            font-weight: 700;
-            width: 100%;
-            margin: 16px 0;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        
-        .post-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
-        }
-        
-        .user-profile-sidebar {
-            padding: 16px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: var(--bg-tertiary);
-            position: relative;
-        }
-        
-        .user-profile-sidebar:hover {
-            background: var(--bg-hover);
-        }
-        
-        .user-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: var(--primary-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-        
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .user-avatar i {
-            color: white;
-            font-size: 20px;
-        }
-        
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .user-name {
-            font-weight: 700;
-            font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .user-handle {
-            font-size: 12px;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .logout-btn {
-            background: none;
-            border: none;
-            color: var(--accent-pink);
-            font-size: 18px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-        
-        .logout-btn:hover {
-            background: rgba(236, 72, 153, 0.1);
-        }
-        
-        /* Main Content */
-        .main-content {
-            margin-left: 280px;
-            margin-right: 360px;
-            min-height: 100vh;
-            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 20px 0;
-        }
-        
-        .main-content.sidebar-collapsed {
-            margin-left: 0;
-        }
-        
-        .content-header {
-            position: sticky;
-            top: 0;
-            background: rgba(10, 14, 39, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 24px 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 0 -10%;
-            padding-left: 10%;
-            padding-right: 10%;
-        }
-        
-        .content-header h1 {
-            font-size: 24px;
-            font-weight: 800;
-            margin: 0;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* Right Sidebar */
-        .right-sidebar {
-            position: fixed;
-            right: 0;
-            top: 0;
-            height: 100vh;
-            width: 360px;
-            padding: 20px;
-            overflow-y: auto;
-            background: var(--bg-secondary);
-            border-left: 1px solid var(--border-color);
-        }
-        
-        .widget {
-            background: var(--bg-tertiary);
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-        }
-        
-        .widget-header {
-            padding: 16px 20px;
-            font-size: 18px;
-            font-weight: 700;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .search-box {
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            padding: 14px 18px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            border: 1px solid var(--border-color);
-            transition: all 0.2s;
-        }
-        
-        .search-box:focus-within {
-            border-color: var(--accent-purple);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-        }
-        
-        .search-box input {
-            background: none;
-            border: none;
-            outline: none;
-            color: var(--text-primary);
-            width: 100%;
-            margin-left: 12px;
-            font-size: 15px;
-        }
-        
-        .search-box input::placeholder {
-            color: var(--text-secondary);
-        }
-        
-        /* Mobile Bottom Nav */
-        .mobile-bottom-nav {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border-color);
-            padding: 8px 0;
-            z-index: 1000;
-            backdrop-filter: blur(20px);
-        }
-        
-        .mobile-nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-secondary);
-            text-decoration: none;
-            padding: 8px;
-            transition: all 0.2s;
-        }
-        
-        .mobile-nav-item i {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-        
-        .mobile-nav-item.active {
-            color: var(--accent-purple);
-        }
-        
-        /* FAB */
-        .fab {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: var(--primary-gradient);
-            border-radius: 16px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6);
-            cursor: pointer;
-            z-index: 999;
-            transition: all 0.3s;
-        }
-        
-        .fab:hover {
-            transform: translateY(-4px) rotate(90deg);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.8);
-        }
-        
-        .fab i {
-            color: white;
-            font-size: 28px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 1400px) {
-            .right-sidebar {
-                display: none;
-            }
-            .main-content {
-                margin-right: 0;
-            }
-            
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar-toggle {
-                display: flex;
-            }
-            
-            .app-logo-fixed {
-                left: 80px;
-            }
-            
-            .sidebar {
-                transform: translateX(-280px);
-            }
-            
-            .sidebar.show {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0;
-                margin-right: 0;
-                padding: 0; /* Remove padding on mobile */
-                padding-bottom: 0 0 80px 0; /* Space for bottom nav */
-            }
-            
-            .mobile-bottom-nav {
-                display: flex;
-            }
-            
-            .fab {
-                display: flex;
-            }
-            
-            .content-header {
-                padding: 25px;
-                /* justify-content: center; Space for hamburger */
-                margin: 0;
-                display: flex;
-            }
-            
-            .content-header h1 {
-                font-size: 20px;
-            }
-        }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--bg-primary);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--bg-hover);
-        }
+      :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --bg-primary: #0a0e27;
+        --bg-secondary: #151932;
+        --bg-tertiary: #1e2139;
+        --bg-hover: #252945;
+        --border-color: #2a2f4f;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a6c5;
+        --accent-purple: #8b5cf6;
+        --accent-pink: #ec4899;
+        --accent-blue: #3b82f6;
+      }
 
-        
-/* Floating Search Button - Only visible on medium screens */
-.floating-search-btn {
-    display: none;
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--primary-gradient);
-    color: white;
-    font-size: 22px;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    z-index: 1000;
-    transition: all 0.3s ease;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-}
+      body {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+        overflow-x: hidden;
+      }
 
-.floating-search-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
-    color: white;
-}
-
-.floating-search-btn:active {
-    transform: scale(0.95);
-}
-
-/* Show only between 769px and 1400px */
-@media (min-width: 769px) and (max-width: 1400px) {
-    .floating-search-btn {
+      /* Sidebar */
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 280px;
+        background: var(--bg-secondary);
+        border-right: 1px solid var(--border-color);
+        padding: 20px;
         display: flex;
-    }
-}
+        flex-direction: column;
+        z-index: 1000;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .sidebar.collapsed {
+        transform: translateX(-280px);
+      }
+
+      /* Sidebar Toggle */
+      .sidebar-toggle {
+        position: fixed;
+        left: 20px;
+        top: 20px;
+        width: 48px;
+        height: 48px;
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 12px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1001;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        transition: all 0.3s;
+        overflow: hidden;
+      }
+
+      .sidebar-toggle.has-avatar {
+        padding: 0;
+      }
+
+      .sidebar-toggle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .sidebar-toggle i {
+        color: white;
+        font-size: 24px;
+      }
+
+      .sidebar-toggle:hover {
+        transform: scale(1.05);
+      }
+
+      /* App Logo (Outside Sidebar) */
+      .app-logo-fixed {
+        position: fixed;
+        left: 80px;
+        top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        z-index: 999;
+      }
+
+      .app-logo-fixed i {
+        font-size: 32px;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .app-logo-fixed span {
+        font-size: 24px;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .sidebar-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+        padding: 12px;
+        background: var(--primary-gradient);
+        border-radius: 16px;
+      }
+
+      .sidebar-logo i {
+        font-size: 32px;
+        color: white;
+      }
+
+      .sidebar-logo span {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(to right, #fff, #e0e7ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .sidebar-nav {
+        flex: 1;
+      }
+
+      .nav-item {
+        margin-bottom: 8px;
+      }
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 14px 16px;
+        border-radius: 12px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .nav-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--primary-gradient);
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      .nav-link:hover::before {
+        opacity: 0.1;
+      }
+
+      .nav-link:hover {
+        color: var(--text-primary);
+        transform: translateX(4px);
+      }
+
+      .nav-link.active {
+        color: var(--text-primary);
+        background: var(--bg-hover);
+      }
+
+      .nav-link.active::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 60%;
+        background: var(--primary-gradient);
+        border-radius: 0 4px 4px 0;
+      }
+
+      .nav-link i {
+        font-size: 22px;
+        margin-right: 16px;
+        width: 22px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .nav-link span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .post-btn {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 16px;
+        font-size: 17px;
+        font-weight: 700;
+        width: 100%;
+        margin: 16px 0;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      .post-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+      }
+
+      .user-profile-sidebar {
+        padding: 16px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: var(--bg-tertiary);
+        position: relative;
+      }
+
+      .user-profile-sidebar:hover {
+        background: var(--bg-hover);
+      }
+
+      .user-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .user-avatar i {
+        color: white;
+        font-size: 20px;
+      }
+
+      .user-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .user-name {
+        font-weight: 700;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .user-handle {
+        font-size: 12px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .logout-btn {
+        background: none;
+        border: none;
+        color: var(--accent-pink);
+        font-size: 18px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 8px;
+        transition: all 0.2s;
+      }
+
+      .logout-btn:hover {
+        background: rgba(236, 72, 153, 0.1);
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: 280px;
+        margin-right: 360px;
+        min-height: 100vh;
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 20px 0;
+      }
+
+      .main-content.sidebar-collapsed {
+        margin-left: 0;
+      }
+
+      .content-header {
+        position: sticky;
+        top: 0;
+        background: rgba(10, 14, 39, 0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-color);
+        padding: 24px 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 -10%;
+        padding-left: 10%;
+        padding-right: 10%;
+      }
+
+      .content-header h1 {
+        font-size: 24px;
+        font-weight: 800;
+        margin: 0;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Right Sidebar */
+      .right-sidebar {
+        position: fixed;
+        right: 0;
+        top: 0;
+        height: 100vh;
+        width: 360px;
+        padding: 20px;
+        overflow-y: auto;
+        background: var(--bg-secondary);
+        border-left: 1px solid var(--border-color);
+      }
+
+      .widget {
+        background: var(--bg-tertiary);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 16px;
+        border: 1px solid var(--border-color);
+      }
+
+      .widget-header {
+        padding: 16px 20px;
+        font-size: 18px;
+        font-weight: 700;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .search-box {
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s;
+      }
+
+      .search-box:focus-within {
+        border-color: var(--accent-purple);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+      }
+
+      .search-box input {
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--text-primary);
+        width: 100%;
+        margin-left: 12px;
+        font-size: 15px;
+      }
+
+      .search-box input::placeholder {
+        color: var(--text-secondary);
+      }
+
+      /* Mobile Bottom Nav */
+      .mobile-bottom-nav {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+        padding: 8px 0;
+        z-index: 1000;
+        backdrop-filter: blur(20px);
+      }
+
+      .mobile-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: var(--text-secondary);
+        text-decoration: none;
+        padding: 8px;
+        transition: all 0.2s;
+      }
+
+      .mobile-nav-item i {
+        font-size: 24px;
+        margin-bottom: 4px;
+      }
+
+      .mobile-nav-item.active {
+        color: var(--accent-purple);
+      }
+
+      /* FAB */
+      .fab {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: var(--primary-gradient);
+        border-radius: 16px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6);
+        cursor: pointer;
+        z-index: 999;
+        transition: all 0.3s;
+      }
+
+      .fab:hover {
+        transform: translateY(-4px) rotate(90deg);
+        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.8);
+      }
+
+      .fab i {
+        color: white;
+        font-size: 28px;
+      }
+
+      /* Responsive */
+      @media (max-width: 1400px) {
+        .right-sidebar {
+          display: none;
+        }
+        .main-content {
+          margin-right: 0;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .sidebar-toggle {
+          display: flex;
+        }
+
+        .app-logo-fixed {
+          left: 80px;
+        }
+
+        .sidebar {
+          transform: translateX(-280px);
+        }
+
+        .sidebar.show {
+          transform: translateX(0);
+        }
+
+        .main-content {
+          margin-left: 0;
+          margin-right: 0;
+          padding: 0; /* Remove padding on mobile */
+          padding-bottom: 0 0 80px 0; /* Space for bottom nav */
+        }
+
+        .mobile-bottom-nav {
+          display: flex;
+        }
+
+        .fab {
+          display: flex;
+        }
+
+        .content-header {
+          padding: 25px;
+          /* justify-content: center; Space for hamburger */
+          margin: 0;
+          display: flex;
+        }
+
+        .content-header h1 {
+          font-size: 20px;
+        }
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--bg-primary);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--bg-tertiary);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--bg-hover);
+      }
+
+      /* Floating Search Button - Only visible on medium screens */
+      .floating-search-btn {
+        display: none;
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        color: white;
+        font-size: 22px;
+
+        z-index: 1000;
+        transition: all 0.3s ease;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+      }
+
+      .floating-search-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+        color: white;
+      }
+
+      .floating-search-btn:active {
+        transform: scale(0.95);
+      }
+
+      /* Show only between 769px and 1400px */
+      @media (min-width: 769px) and (max-width: 1400px) {
+        .floating-search-btn {
+          display: flex;
+        }
+      }
     </style>
-    
+
     {% block extra_css %}{% endblock %}
-</head>
-<body>
+  </head>
+  <body>
     <!-- App Logo (Fixed, Outside Sidebar) -->
 
     <!-- Desktop Sidebar -->
     <div class="sidebar" id="sidebar">
-        <!-- Logo removed from sidebar, now outside -->
-        
-        <nav class="sidebar-nav" style="margin-top: 20px;">
-            <ul class="list-unstyled">
-                <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/feed/' %}active{% endif %}" href="{% url 'feed' %}">
-                                <i class="bi bi-house-door-fill"></i> Feed
-                            </a>
-                        </li>
-                <li class="nav-item">
-                    <a href="{% url 'trending' %}" class="nav-link {% if request.path == '/trending/' %}active{% endif %}">
-                        <i class="bi bi-fire"></i>
-                        <span>Trending</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'notifications' %}" class="nav-link {% if request.path == '/notifications/' %}active{% endif %}">
-                        <i class="bi bi-bell-fill"></i>
-                        <span>Notifications</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'bookmarks' %}" class="nav-link {% if request.path == '/bookmarks/' %}active{% endif %}">
-                        <i class="bi bi-bookmark-fill"></i>
-                        <span>Saved</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-    <a href="{% url 'messages_inbox' %}" class="nav-link {% if 'messages' in request.path %}active{% endif %}">
-        <i class="bi bi-chat-dots-fill"></i>
-        <span>Messages</span>
-        <span class="unread-count-badge" id="sidebarUnreadBadge" style="display: none;"></span>
-    </a>
-</li>
+      <!-- Logo removed from sidebar, now outside -->
 
-                <li class="nav-item">
-                    <a href="{% url 'public_profile' user.username %}" class="nav-link {% if request.path == '/user.username/' %}active{% endif %}">
-                        <i class="bi bi-person-fill"></i>
-                        <span>Profile</span>
-                    </a>
-                </li>
-            </ul>
-            
-            <button class="post-btn" onclick="window.location.href='{% url 'create_post_page' %}'">
-                <i class="bi bi-plus-lg"></i> Create Post
-            </button>
-        </nav>
-        
-        <div class="user-profile-sidebar">
-            <div class="user-avatar">
-                {% if user.profile.profile_picture %}
-                    <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}">
-                {% else %}
-                    <i class="bi bi-person-fill"></i>
-                {% endif %}
-            </div>
-            <div class="user-info">
-                <div class="user-name">{{ user.username }}</div>
-                <div class="user-handle">@{{ user.username }}</div>
-            </div>
-            <a href="{% url 'logout' %}" class="logout-btn" title="Logout">
-                <i class="bi bi-box-arrow-right"></i>
+      <nav class="sidebar-nav" style="margin-top: 20px">
+        <ul class="list-unstyled">
+          <li class="nav-item">
+            <a
+              class="nav-link {% if request.path == '/feed/' %}active{% endif %}"
+              href="{% url 'feed' %}"
+            >
+              <i class="bi bi-house-door-fill"></i> Feed
             </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{% url 'trending' %}"
+              class="nav-link {% if request.path == '/trending/' %}active{% endif %}"
+            >
+              <i class="bi bi-fire"></i>
+              <span>Trending</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{% url 'notifications' %}"
+              class="nav-link {% if request.path == '/notifications/' %}active{% endif %}"
+            >
+              <i class="bi bi-bell-fill"></i>
+              <span>Notifications</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{% url 'bookmarks' %}"
+              class="nav-link {% if request.path == '/bookmarks/' %}active{% endif %}"
+            >
+              <i class="bi bi-bookmark-fill"></i>
+              <span>Saved</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="{% url 'messages_inbox' %}"
+              class="nav-link {% if 'messages' in request.path %}active{% endif %}"
+            >
+              <i class="bi bi-chat-dots-fill"></i>
+              <span>Messages</span>
+              <span
+                class="unread-count-badge"
+                id="sidebarUnreadBadge"
+                style="display: none"
+              ></span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a
+              href="{% url 'public_profile' user.username %}"
+              class="nav-link {% if request.path == '/user.username/' %}active{% endif %}"
+            >
+              <i class="bi bi-person-fill"></i>
+              <span>Profile</span>
+            </a>
+          </li>
+        </ul>
+
+        <button
+          class="post-btn"
+          onclick="window.location.href='{% url 'create_post_page' %}'"
+        >
+          <i class="bi bi-plus-lg"></i> Create Post
+        </button>
+      </nav>
+
+      <div class="user-profile-sidebar">
+        <div class="user-avatar">
+          {% if user.profile.profile_picture %}
+          <img
+            src="{{ user.profile.profile_picture.url }}"
+            alt="{{ user.username }}"
+          />
+          {% else %}
+          <i class="bi bi-person-fill"></i>
+          {% endif %}
         </div>
+        <div class="user-info">
+          <div class="user-name">{{ user.username }}</div>
+          <div class="user-handle">@{{ user.username }}</div>
+        </div>
+        <a href="{% url 'logout' %}" class="logout-btn" title="Logout">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </div>
     </div>
-    
+
     <!-- Main Content -->
     <main class="main-content" id="mainContent">
-        {% block content %}{% endblock %}
+      {% block content %}{% endblock %}
     </main>
-    
+
     <!-- Right Sidebar -->
     <aside class="right-sidebar">
-        {% if path != '/search/' %}
-        <a href="/search" style="text-decoration: none;">
-            <div class="search-box">
-                <i class="bi bi-search" style="color: var(--text-secondary); font-size: 18px;"></i>
-                <input placeholder="Search CampusFeed" id="searchInput" disabled>
-            </div>
-        </a>
-        {% endif %}
-        
-        <div class="widget">
-            <div class="widget-header">🔥 Trending on Campus</div>
-            <div style="padding: 12px;">
-                <div style="padding: 12px; cursor: pointer; border-radius: 8px; transition: all 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
-                    <div style="font-size: 13px; color: var(--text-secondary);">#1 • Campus</div>
-                    <div style="font-weight: 700; margin: 4px 0;">#ExamPrep</div>
-                    <div style="font-size: 13px; color: var(--text-secondary);">1.2K posts</div>
-                </div>
-                <div style="padding: 12px; cursor: pointer; border-radius: 8px; transition: all 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
-                    <div style="font-size: 13px; color: var(--text-secondary);">#2 • Events</div>
-                    <div style="font-weight: 700; margin: 4px 0;">#CampusWeek</div>
-                    <div style="font-size: 13px; color: var(--text-secondary);">856 posts</div>
-                </div>
-                <div style="padding: 12px; cursor: pointer; border-radius: 8px; transition: all 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
-                    <div style="font-size: 13px; color: var(--text-secondary);">#3 • Funny</div>
-                    <div style="font-weight: 700; margin: 4px 0;">#MondayMood</div>
-                    <div style="font-size: 13px; color: var(--text-secondary);">2.1K posts</div>
-                </div>
-            </div>
+      {% if path != '/search/' %}
+      <a href="/search" style="text-decoration: none">
+        <div class="search-box">
+          <i
+            class="bi bi-search"
+            style="color: var(--text-secondary); font-size: 18px"
+          ></i>
+          <input placeholder="Search  " id="searchInput" disabled />
         </div>
+      </a>
+      {% endif %}
+
+      <div class="widget">
+        <div class="widget-header">🔥 Trending on Campus</div>
+        <div style="padding: 12px">
+          <div
+            style="
+              padding: 12px;
+              cursor: pointer;
+              border-radius: 8px;
+              transition: all 0.2s;
+            "
+            onmouseover="this.style.background='var(--bg-hover)'"
+            onmouseout="this.style.background='transparent'"
+          >
+            <div style="font-size: 13px; color: var(--text-secondary)">
+              #1 • Campus
+            </div>
+            <div style="font-weight: 700; margin: 4px 0">#ExamPrep</div>
+            <div style="font-size: 13px; color: var(--text-secondary)">
+              1.2K posts
+            </div>
+          </div>
+          <div
+            style="
+              padding: 12px;
+              cursor: pointer;
+              border-radius: 8px;
+              transition: all 0.2s;
+            "
+            onmouseover="this.style.background='var(--bg-hover)'"
+            onmouseout="this.style.background='transparent'"
+          >
+            <div style="font-size: 13px; color: var(--text-secondary)">
+              #2 • Events
+            </div>
+            <div style="font-weight: 700; margin: 4px 0">#CampusWeek</div>
+            <div style="font-size: 13px; color: var(--text-secondary)">
+              856 posts
+            </div>
+          </div>
+          <div
+            style="
+              padding: 12px;
+              cursor: pointer;
+              border-radius: 8px;
+              transition: all 0.2s;
+            "
+            onmouseover="this.style.background='var(--bg-hover)'"
+            onmouseout="this.style.background='transparent'"
+          >
+            <div style="font-size: 13px; color: var(--text-secondary)">
+              #3 • Funny
+            </div>
+            <div style="font-weight: 700; margin: 4px 0">#MondayMood</div>
+            <div style="font-size: 13px; color: var(--text-secondary)">
+              2.1K posts
+            </div>
+          </div>
+        </div>
+      </div>
     </aside>
-    
+
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav">
-        <a href="{% url 'feed' %}" class="mobile-nav-item {% if request.path == '/feed/' %}active{% endif %}">
-            <i class="bi bi-house-door-fill"></i>
-        </a>
-        <a href="{% url 'trending' %}" class="mobile-nav-item {% if request.path == '/trending/' %}active{% endif %}">
-            <i class="bi bi-fire"></i>
-        </a>
-        <a href="{% url 'notifications' %}" class="mobile-nav-item {% if request.path == '/notifications/' %}active{% endif %}">
-            <i class="bi bi-bell-fill"></i>
-        </a>
-        <a href="/search" class="mobile-nav-item {% if request.path == '/search/' %}active{% endif %}">
-            <i class="bi bi-search-heart-fill"></i>
-        </a>
-        <a href="{% url 'messages_inbox' %}" class="mobile-nav-item {% if 'messages' in request.path %}active{% endif %}" style="position: relative;">
-    <i class="bi bi-chat-dots-fill"></i>
-    <span class="mobile-unread-badge" id="mobileUnreadBadge" style="display: none;"></span>
-</a>
-
+      <a
+        href="{% url 'feed' %}"
+        class="mobile-nav-item {% if request.path == '/feed/' %}active{% endif %}"
+      >
+        <i class="bi bi-house-door-fill"></i>
+      </a>
+      <a
+        href="{% url 'trending' %}"
+        class="mobile-nav-item {% if request.path == '/trending/' %}active{% endif %}"
+      >
+        <i class="bi bi-fire"></i>
+      </a>
+      <a
+        href="{% url 'notifications' %}"
+        class="mobile-nav-item {% if request.path == '/notifications/' %}active{% endif %}"
+      >
+        <i class="bi bi-bell-fill"></i>
+      </a>
+      <a
+        href="/search"
+        class="mobile-nav-item {% if request.path == '/search/' %}active{% endif %}"
+      >
+        <i class="bi bi-search-heart-fill"></i>
+      </a>
+      <a
+        href="{% url 'messages_inbox' %}"
+        class="mobile-nav-item {% if 'messages' in request.path %}active{% endif %}"
+        style="position: relative"
+      >
+        <i class="bi bi-chat-dots-fill"></i>
+        <span
+          class="mobile-unread-badge"
+          id="mobileUnreadBadge"
+          style="display: none"
+        ></span>
+      </a>
     </nav>
-    
-        {% if request.path != '/search/' %}
+
+    {% if request.path != '/search/' %}
     <a href="{% url 'search' %}" class="floating-search-btn">
-    <i class="bi bi-search"></i>
-</a>
+      <i class="bi bi-search"></i>
+    </a>
     {% endif %}
-    
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
-        // Sidebar toggle
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('mainContent');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        
-        sidebarToggle.addEventListener('click', () => {
-            const isCollapsed = sidebar.classList.contains('show');
-            
-            sidebar.classList.toggle('show');
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('sidebar-collapsed');
-            
-            // Hide/show toggle button when sidebar is open on mobile
-            if (window.innerWidth <= 768) {
-                if (!isCollapsed) {
-                    sidebarToggle.style.opacity = '0';
-                    sidebarToggle.style.pointerEvents = 'none';
-                } else {
-                    sidebarToggle.style.opacity = '1';
-                    sidebarToggle.style.pointerEvents = 'all';
-                }
-            }
-        });
-        
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768 && 
-                sidebar.classList.contains('show') && 
-                !sidebar.contains(e.target) && 
-                !sidebarToggle.contains(e.target)) {
-                sidebar.classList.remove('show');
-                sidebarToggle.style.opacity = '1';
-                sidebarToggle.style.pointerEvents = 'all';
-            }
-        });
-        
-        // Search functionality
-        const searchInput = document.getElementById('searchInput');
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const query = e.target.value;
-                if (query) {
-                    window.location.href = `/feed/?q=${encodeURIComponent(query)}`;
-                }
-            }
-        });
+      // Sidebar toggle
+      const sidebar = document.getElementById("sidebar");
+      const mainContent = document.getElementById("mainContent");
+      const sidebarToggle = document.getElementById("sidebarToggle");
+
+      sidebarToggle.addEventListener("click", () => {
+        const isCollapsed = sidebar.classList.contains("show");
+
+        sidebar.classList.toggle("show");
+        sidebar.classList.toggle("collapsed");
+        mainContent.classList.toggle("sidebar-collapsed");
+
+        // Hide/show toggle button when sidebar is open on mobile
+        if (window.innerWidth <= 768) {
+          if (!isCollapsed) {
+            sidebarToggle.style.opacity = "0";
+            sidebarToggle.style.pointerEvents = "none";
+          } else {
+            sidebarToggle.style.opacity = "1";
+            sidebarToggle.style.pointerEvents = "all";
+          }
+        }
+      });
+
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener("click", (e) => {
+        if (
+          window.innerWidth <= 768 &&
+          sidebar.classList.contains("show") &&
+          !sidebar.contains(e.target) &&
+          !sidebarToggle.contains(e.target)
+        ) {
+          sidebar.classList.remove("show");
+          sidebarToggle.style.opacity = "1";
+          sidebarToggle.style.pointerEvents = "all";
+        }
+      });
+
+      // Search functionality
+      const searchInput = document.getElementById("searchInput");
+      searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          const query = e.target.value;
+          if (query) {
+            window.location.href = `/feed/?q=${encodeURIComponent(query)}`;
+          }
+        }
+      });
     </script>
-    
+
     {% block extra_js %}{% endblock %}
-</body>
+  </body>
 </html>

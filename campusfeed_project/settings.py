@@ -4,6 +4,7 @@ Django settings for campusfeed_project project.
 
 from pathlib import Path
 import os
+import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -64,10 +65,8 @@ WSGI_APPLICATION = 'campusfeed_project.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='postgresql://feed_jjzr_user:mEZjpqEQWfHldpyauMkgaESI2sbxA4iH@dpg-d4ie1bs9c44c739evkv0-a.oregon-postgres.render.com/feed_jjzr')
 }
 
 

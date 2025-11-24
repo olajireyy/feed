@@ -1,17 +1,17 @@
 {% extends 'base.html' %}
 
-{% block title %}Login - CampusFeed{% endblock %}
+{% block title %}Login -  {% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-5 col-lg-4">
-            <div class="card shadow-sm border-0 mt-5">
+            <div class="card shadow-sm border-0 mt-5"  style="background-color: var(--bg-secondary); color: var(--text-primary);">
                 <div class="card-body p-5">
                     <div class="text-center mb-4">
                         <i class="bi bi-mortarboard-fill" style="font-size: 3rem; color: var(--primary-color);"></i>
                         <h2 class="fw-bold mt-3">Welcome Back!</h2>
-                        <p class="text-muted">Login to your NONAME account</p>
+                        <p class="text-muted">Login to your account</p>
                     </div>
 
                     <form method="post" novalidate>
@@ -70,10 +70,10 @@
             </div>
 
             <!-- Info Card -->
-            <div class="card shadow-sm border-0 mt-3">
-                <div class="card-body text-center p-3">
-                    <small class="text-muted">
-                        <i class="bi bi-shield-check"></i> Your campus community, secured and private
+            <div class="card shadow-sm border-0 mt-3"  style="background-color: var(--bg-secondary); color: var(--text-primary);">
+                <div class="card-body text-center p-3" style="color: white;">
+                    <small style="color: white;">
+                        <i class="bi bi-shield-check" style="color: white;"></i> Your campus community, secured and private
                     </small>
                 </div>
             </div>

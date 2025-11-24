@@ -1,138 +1,105 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}CampusFeed{% endblock %}</title>
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %} {% endblock %}</title>
+
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+
     <!-- Custom CSS -->
     <style>
-        :root {
-            --primary-color: #6366f1;
-            --secondary-color: #8b5cf6;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
-        }
-        
-        body {
-            background-color: #f8f9fa;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        }
-        
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--primary-color) !important;
-        }
-        
-        .navbar {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            background-color: white !important;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        
-        .btn-primary:hover {
-            background-color: #4f46e5;
-            border-color: #4f46e5;
-        }
-        
-        .alert {
-            border-radius: 8px;
-        }
-        
-        .content-wrapper {
-            min-height: calc(100vh - 120px);
-            padding-top: 20px;
-            padding-bottom: 40px;
-        }
-    </style>
-    
-    {% block extra_css %}{% endblock %}
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="bi bi-mortarboard-fill"></i> 
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon">NONAME</span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/feed/' %}active{% endif %}" href="{% url 'feed' %}">
-                                <i class="bi bi-house-door"></i> Feed
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/trending/' %}active{% endif %}" href="{% url 'trending' %}">
-                                <i class="bi bi-fire"></i> Trending
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/notifications/' %}active{% endif %}" href="{% url 'notifications' %}">
-                                <i class="bi bi-bell"></i> Notifications
-                            </a>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/profile/' %}active{% endif %}" href="{% url 'profile' %}">
-                                <i class="bi bi-person-circle"></i> Profile
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                {{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{% url 'profile' %}">Edit Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Logout</a></li>
-                            </ul>
-                        </li>
-                    
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
+      :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --bg-primary: #0a0e27;
+        --bg-secondary: #151932;
+        --bg-tertiary: #1e2139;
+        --bg-hover: #252945;
+        --border-color: #2a2f4f;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a6c5;
+        --accent-purple: #8b5cf6;
+        --accent-pink: #ec4899;
+        --accent-blue: #3b82f6;
+      }
 
+      body {
+        background-color:var(--bg-primary);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+
+      .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: var(--primary-color) !important;
+      }
+
+      .navbar {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background-color: white !important;
+      }
+
+      .btn-primary {
+        background-color: var(--accent-purple);
+        border-color: var(--primary-color);
+      }
+
+      .btn-primary:hover {
+        background-color: #4f46e5;
+        border-color: #4f46e5;
+      }
+
+      .alert {
+        border-radius: 8px;
+      }
+
+      .content-wrapper {
+        min-height: calc(100vh - 120px);
+        padding-top: 20px;
+        padding-bottom: 40px;
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+  
+    
     <!-- Main Content -->
-    <div class="content-wrapper">
-        {% block content %}{% endblock %}
-    </div>
+    <div class="content-wrapper">{% block content %}{% endblock %}</div>
 
     <!-- Footer -->
-    <footer class="bg-white border-top mt-5 py-4">
-        <div class="container text-center text-muted">
-            <p class="mb-0">&copy; 2024 CampusFeed. Made with <i class="bi bi-heart-fill text-danger"></i> for students.</p>
-        </div>
+    <footer class="--bg-primary border-top mt-5 py-4">
+      <div class="container text-center text-muted">
+        <p class="mb-0" style="color: white;">
+          &copy; 2025 . Made with
+          <i class="bi bi-heart-fill text-danger"></i> by Olajireyy.
+        </p>
+      </div>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- CSRF Token for AJAX -->
     <!-- <script>
         const csrftoken = '{{ csrf_token }}';
     </script> -->
-    
+
     {% block extra_js %}{% endblock %}
-</body>
+  </body>
 </html>

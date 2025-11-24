@@ -1,16 +1,13 @@
-{% extends 'general_base.html' %}
-
-{% block title %}Search - CampusFeed{% endblock %}
-
-{% block content %}
+{% extends 'general_base.html' %} {% block title %}Search - {% endblock %} {%
+block content %}
 
 <style>
-.search-container {
+  .search-container {
     max-width: 600px;
     margin: 0 auto;
-}
+  }
 
-.search-box {
+  .search-box {
     display: flex;
     align-items: center;
     background-color: var(--background-secondary);
@@ -18,46 +15,46 @@
     padding: 10px 16px;
     gap: 10px;
     margin: 16px;
-}
+  }
 
-.search-box input {
+  .search-box input {
     flex: 1;
     border: none;
     outline: none;
     background: transparent;
     font-size: 16px;
     color: var(--text-primary);
-}
+  }
 
-.search-box input::placeholder {
+  .search-box input::placeholder {
     color: var(--text-secondary);
-}
+  }
 
-.search-box button {
+  .search-box button {
     background: none;
     border: none;
     cursor: pointer;
     padding: 4px;
     color: var(--text-secondary);
-}
+  }
 
-.search-box button:hover {
+  .search-box button:hover {
     color: var(--primary-color);
-}
+  }
 
-/* Search Tabs */
-.search-tabs {
+  /* Search Tabs */
+  .search-tabs {
     display: flex;
     border-bottom: 1px solid var(--border-color);
     overflow-x: auto;
     scrollbar-width: none;
-}
+  }
 
-.search-tabs::-webkit-scrollbar {
+  .search-tabs::-webkit-scrollbar {
     display: none;
-}
+  }
 
-.search-tab {
+  .search-tab {
     flex: 1;
     min-width: fit-content;
     padding: 14px 16px;
@@ -69,190 +66,190 @@
     border-bottom: 2px solid transparent;
     transition: all 0.2s;
     white-space: nowrap;
-}
+  }
 
-.search-tab:hover {
+  .search-tab:hover {
     background-color: var(--background-secondary);
     color: var(--text-primary);
-}
+  }
 
-.search-tab.active {
+  .search-tab.active {
     color: var(--primary-color);
     border-bottom-color: var(--primary-color);
-}
+  }
 
-.search-results-info {
+  .search-results-info {
     padding: 16px;
     color: var(--text-secondary);
     font-size: 14px;
     border-bottom: 1px solid var(--border-color);
-}
+  }
 
-.no-results {
+  .no-results {
     text-align: center;
     padding: 48px 16px;
     color: var(--text-secondary);
-}
+  }
 
-.no-results i {
+  .no-results i {
     font-size: 48px;
     margin-bottom: 16px;
     display: block;
-}
+  }
 
-.no-results h3 {
+  .no-results h3 {
     color: var(--text-primary);
     margin-bottom: 8px;
-}
+  }
 
-.search-prompt {
+  .search-prompt {
     text-align: center;
     padding: 48px 16px;
     color: var(--text-secondary);
-}
+  }
 
-.search-prompt i {
+  .search-prompt i {
     font-size: 48px;
     margin-bottom: 16px;
     display: block;
-}
+  }
 
-/* User Card Styles */
-.user-card {
+  /* User Card Styles */
+  .user-card {
     display: flex;
     align-items: center;
     padding: 12px 16px;
     gap: 12px;
     border-bottom: 1px solid var(--border-color);
     transition: background-color 0.2s;
-}
+  }
 
-.user-card:hover {
+  .user-card:hover {
     background-color: var(--background-secondary);
-}
+  }
 
-.user-avatar {
+  .user-avatar {
     width: 48px;
     height: 48px;
     border-radius: 50%;
     object-fit: cover;
-}
+  }
 
-.user-info {
+  .user-info {
     flex: 1;
     min-width: 0;
-}
+  }
 
-.user-display-name {
+  .user-display-name {
     font-weight: 600;
     color: var(--text-primary);
     text-decoration: none;
-}
+  }
 
-.user-display-name:hover {
+  .user-display-name:hover {
     text-decoration: underline;
-}
+  }
 
-.user-username {
+  .user-username {
     color: var(--text-secondary);
     font-size: 14px;
-}
+  }
 
-.user-bio {
+  .user-bio {
     color: var(--text-secondary);
     font-size: 14px;
     margin-top: 4px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
+  }
 
-.follow-btn {
+  .follow-btn {
     padding: 8px 16px;
     border-radius: 20px;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
-}
+  }
 
-.follow-btn.follow {
+  .follow-btn.follow {
     background-color: var(--text-primary);
     color: black;
     border: none;
-}
+  }
 
-.follow-btn.follow:hover {
+  .follow-btn.follow:hover {
     opacity: 0.85;
-}
+  }
 
-.follow-btn.following {
+  .follow-btn.following {
     background-color: transparent;
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-}
+  }
 
-.follow-btn.following:hover {
+  .follow-btn.following:hover {
     border-color: #f4212e;
     color: #f4212e;
-}
+  }
 
-/* Post styles */
-.post-card {
+  /* Post styles */
+  .post-card {
     background-color: var(--background-primary);
     border-bottom: 1px solid var(--border-color);
     padding: 16px;
-}
+  }
 
-.post-header {
+  .post-header {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 12px;
-}
+  }
 
-.post-avatar {
+  .post-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-}
+  }
 
-.post-author-info {
+  .post-author-info {
     flex: 1;
-}
+  }
 
-.post-author-name {
+  .post-author-name {
     font-weight: 600;
     color: var(--text-primary);
-}
+  }
 
-.post-username {
+  .post-username {
     color: var(--text-secondary);
     font-size: 14px;
-}
+  }
 
-.post-content {
+  .post-content {
     color: var(--text-primary);
     margin-bottom: 12px;
     line-height: 1.5;
-}
+  }
 
-.post-image {
+  .post-image {
     margin-bottom: 12px;
-}
+  }
 
-.post-image img {
+  .post-image img {
     max-width: 100%;
     border-radius: 12px;
-}
+  }
 
-.post-actions {
+  .post-actions {
     display: flex;
     gap: 24px;
-}
+  }
 
-.post-action-btn {
+  .post-action-btn {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -263,120 +260,134 @@
     font-size: 14px;
     padding: 4px;
     text-decoration: none;
-}
+  }
 
-.post-action-btn:hover {
+  .post-action-btn:hover {
     color: var(--primary-color);
-}
+  }
 
-.post-action-btn.liked {
+  .post-action-btn.liked {
     color: #e0245e;
-}
+  }
 
-.pagination-container {
+  .pagination-container {
     display: flex;
     justify-content: center;
     gap: 8px;
     padding: 20px;
-}
+  }
 
-.pagination-container a,
-.pagination-container span {
+  .pagination-container a,
+  .pagination-container span {
     padding: 8px 12px;
     border-radius: 8px;
     text-decoration: none;
     color: var(--text-primary);
     background-color: var(--background-secondary);
-}
+  }
 
-.pagination-container a:hover {
+  .pagination-container a:hover {
     background-color: var(--primary-color);
     color: white;
-}
+  }
 
-.pagination-container .current {
+  .pagination-container .current {
     background-color: var(--primary-color);
     color: white;
-}
+  }
 </style>
 
 <div class="search-container">
-    <!-- Search Form -->
-    <form method="GET" action="{% url 'search' %}">
-        <input type="hidden" name="tab" value="{{ current_tab|default:'top' }}">
-        <div class="search-box">
-            <i class="bi bi-search"></i>
-            <input 
-                type="text" 
-                name="q" 
-                placeholder="Search CampusFeed" 
-                id="searchInput"
-                value="{{ search_query|default:'' }}"
-                autocomplete="off"
-            >
-            <button type="submit">
-                <i class="bi bi-arrow-right-circle"></i>
-            </button>
-        </div>
-    </form>
-
-    {% if search_query %}
-    <!-- Search Tabs -->
-    <div class="search-tabs">
-        <a href="?q={{ search_query }}&tab=top" class="search-tab {% if current_tab == 'top' %}active{% endif %}">
-            Top
-        </a>
-        <a href="?q={{ search_query }}&tab=latest" class="search-tab {% if current_tab == 'latest' %}active{% endif %}">
-            Latest
-        </a>
-        <a href="?q={{ search_query }}&tab=users" class="search-tab {% if current_tab == 'users' %}active{% endif %}">
-            Users
-        </a>
-        <a href="?q={{ search_query }}&tab=media" class="search-tab {% if current_tab == 'media' %}active{% endif %}">
-            Media
-        </a>
+  <!-- Search Form -->
+  <form method="GET" action="{% url 'search' %}">
+    <input type="hidden" name="tab" value="{{ current_tab|default:'top' }}" />
+    <div class="search-box">
+      <i class="bi bi-search"></i>
+      <input
+        type="text"
+        name="q"
+        placeholder="Search  "
+        id="searchInput"
+        value="{{ search_query|default:'' }}"
+        autocomplete="off"
+      />
+      <button type="submit">
+        <i class="bi bi-arrow-right-circle"></i>
+      </button>
     </div>
+  </form>
 
-    <!-- Results Info -->
-    <div class="search-results-info">
-        {% if current_tab == 'users' %}
-            {% if users %}
-                Found {{ users.paginator.count }} user{{ users.paginator.count|pluralize }} for "{{ search_query }}"
-            {% else %}
-                No users found for "{{ search_query }}"
-            {% endif %}
-        {% else %}
-            {% if posts %}
-                Found {{ posts.paginator.count }} post{{ posts.paginator.count|pluralize }} for "{{ search_query }}"
-            {% else %}
-                No posts found for "{{ search_query }}"
-            {% endif %}
-        {% endif %}
+  {% if search_query %}
+  <!-- Search Tabs -->
+  <div class="search-tabs">
+    <a
+      href="?q={{ search_query }}&tab=top"
+      class="search-tab {% if current_tab == 'top' %}active{% endif %}"
+    >
+      Top
+    </a>
+    <a
+      href="?q={{ search_query }}&tab=latest"
+      class="search-tab {% if current_tab == 'latest' %}active{% endif %}"
+    >
+      Latest
+    </a>
+    <a
+      href="?q={{ search_query }}&tab=users"
+      class="search-tab {% if current_tab == 'users' %}active{% endif %}"
+    >
+      Users
+    </a>
+    <a
+      href="?q={{ search_query }}&tab=media"
+      class="search-tab {% if current_tab == 'media' %}active{% endif %}"
+    >
+      Media
+    </a>
+  </div>
+
+  <!-- Results Info -->
+  <div class="search-results-info">
+    {% if current_tab == 'users' %} {% if users %} Found {{
+    users.paginator.count }} user{{ users.paginator.count|pluralize }} for "{{
+    search_query }}" {% else %} No users found for "{{ search_query }}" {% endif
+    %} {% else %} {% if posts %} Found {{ posts.paginator.count }} post{{
+    posts.paginator.count|pluralize }} for "{{ search_query }}" {% else %} No
+    posts found for "{{ search_query }}" {% endif %} {% endif %}
+  </div>
+
+  <!-- Users Tab Content -->
+  {% if current_tab == 'users' %} {% if users %} {% for user in users %}
+  <div class="user-card">
+    <a href="{% url 'public_profile' user.username %}">
+      {% if user.profile.profile_picture %}
+      <img
+        src="{{ user.profile.profile_picture.url }}"
+        alt="{{ user.username }}"
+        class="user-avatar"
+      />
+      {% else %}
+
+      <i class="bi bi-person-fill user-avatar"></i>
+      {% endif %}
+    </a>
+    <div class="user-info">
+      <a
+        href="{% url 'public_profile' user.username %}"
+        class="user-display-name"
+      >
+        {{ user.profile.display_name|default:user.username }}
+      </a>
+      <div class="user-username" style="font-size: 12px">
+        @{{ user.username }}
+      </div>
+      {% if user.profile.bio %}
+      <div class="user-bio" style="font-size: 11px">
+        {{ user.profile.bio|truncatewords:10 }}
+      </div>
+      {% endif %}
     </div>
-
-    <!-- Users Tab Content -->
-    {% if current_tab == 'users' %}
-        {% if users %}
-            {% for user in users %}
-            <div class="user-card">
-                <a href="{% url 'public_profile' user.username %}">
-                    {% if user.profile.profile_picture %}
-                        <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" class="user-avatar">
-                    {% else %}
-                        
-                        <i class="bi bi-person-fill user-avatar"></i>
-                    {% endif %}
-                </a>
-                <div class="user-info">
-                    <a href="{% url 'public_profile' user.username %}" class="user-display-name">
-                        {{ user.profile.display_name|default:user.username }}
-                    </a>
-                    <div class="user-username" style="font-size: 12px;">@{{ user.username }}</div>
-                    {% if user.profile.bio %}
-                        <div class="user-bio" style="font-size: 11px;">{{ user.profile.bio|truncatewords:10 }}</div>
-                    {% endif %}
-                </div>
-                <!-- {% if user != request.user %}
+    <!-- {% if user != request.user %}
                     {% if user in following %}
                         <button class="follow-btn following" data-user-id="{{ user.id }}" onclick="toggleFollow({{ profile_user.id }})">
                             Following
@@ -387,156 +398,177 @@
                         </button>
                     {% endif %}
                 {% endif %} -->
-            </div>
-            {% endfor %}
+  </div>
+  {% endfor %}
 
-            <!-- Users Pagination -->
-            {% if users.has_other_pages %}
-            <div class="pagination-container">
-                {% if users.has_previous %}
-                    <a href="?q={{ search_query }}&tab=users&page={{ users.previous_page_number }}">&laquo; Prev</a>
-                {% endif %}
-                <span class="current">Page {{ users.number }} of {{ users.paginator.num_pages }}</span>
-                {% if users.has_next %}
-                    <a href="?q={{ search_query }}&tab=users&page={{ users.next_page_number }}">Next &raquo;</a>
-                {% endif %}
-            </div>
-            {% endif %}
-        {% else %}
-            <div class="no-results">
-                <i class="bi bi-person-x"></i>
-                <h3>No users found</h3>
-                <p>Try searching for a different name or username</p>
-            </div>
-        {% endif %}
-
-    <!-- Posts Tab Content (Top, Latest, Media) -->
-    {% else %}
-        {% if posts %}
-            {% for post in posts %}
-            <div class="post-card">
-                <div class="post-header">
-                    <a href="{% url 'profile' post.author.username %}">
-                        {% if post.author.profile.profile_picture and not post.is_anonymous %}
-                            <img src="{{ post.author.profile.profile_picture.url }}" alt="{{ post.author.username }}" class="post-avatar">
-                        {% else %}
-                            <i class="bi bi-person-fill"></i>
-                        {% endif %}
-                    </a>
-                    <div class="post-author-info">
-                        <a href="{% url 'profile' post.author.username %}" style="text-decoration: none;">
-                            <div class="post-author-name">{{ post.author.profile.display_name|default:post.author.username }}</div>
-                            <div class="post-username">@{{ post.author.username }}</div>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="post-content">{{ post.content }}</div>
-
-                {% if post.image %}
-                <div class="post-image">
-                    <img src="{{ post.image.url }}" alt="Post image">
-                </div>
-                {% endif %}
-
-                <div class="post-actions">
-                    <button class="post-action-btn {% if post.id in liked_post_ids %}liked{% endif %}" 
-                            data-post-id="{{ post.id }}" 
-                            onclick="toggleLike({{ post.id }})">
-                        <i class="bi {% if post.id in liked_post_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
-                        <span>{{ post.likes.count }}</span>
-                    </button>
-                    <a href="{% url 'post_detail' post.id %}" class="post-action-btn">
-                        <i class="bi bi-chat"></i>
-                        <span>{{ post.comments.count }}</span>
-                    </a>
-                </div>
-            </div>
-            {% endfor %}
-
-            <!-- Posts Pagination -->
-            {% if posts.has_other_pages %}
-            <div class="pagination-container">
-                {% if posts.has_previous %}
-                    <a href="?q={{ search_query }}&tab={{ current_tab }}&page={{ posts.previous_page_number }}">&laquo; Prev</a>
-                {% endif %}
-                <span class="current">Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span>
-                {% if posts.has_next %}
-                    <a href="?q={{ search_query }}&tab={{ current_tab }}&page={{ posts.next_page_number }}">Next &raquo;</a>
-                {% endif %}
-            </div>
-            {% endif %}
-        {% else %}
-            <div class="no-results">
-                <i class="bi bi-file-earmark-x"></i>
-                <h3>No posts found</h3>
-                <p>Try searching for something else</p>
-            </div>
-        {% endif %}
+  <!-- Users Pagination -->
+  {% if users.has_other_pages %}
+  <div class="pagination-container">
+    {% if users.has_previous %}
+    <a
+      href="?q={{ search_query }}&tab=users&page={{ users.previous_page_number }}"
+      >&laquo; Prev</a
+    >
     {% endif %}
+    <span class="current"
+      >Page {{ users.number }} of {{ users.paginator.num_pages }}</span
+    >
+    {% if users.has_next %}
+    <a href="?q={{ search_query }}&tab=users&page={{ users.next_page_number }}"
+      >Next &raquo;</a
+    >
+    {% endif %}
+  </div>
+  {% endif %} {% else %}
+  <div class="no-results">
+    <i class="bi bi-person-x"></i>
+    <h3>No users found</h3>
+    <p>Try searching for a different name or username</p>
+  </div>
+  {% endif %}
 
-    {% else %}
-    <!-- Initial Search Prompt -->
-    <div class="search-prompt">
-        <i class="bi bi-search"></i>
-        <h3>Search CampusFeed</h3>
-        <p>Find posts, users, and media</p>
+  <!-- Posts Tab Content (Top, Latest, Media) -->
+  {% else %} {% if posts %} {% for post in posts %}
+  <div class="post-card">
+    <div class="post-header">
+      <a href="{% url 'profile' post.author.username %}">
+        {% if post.author.profile.profile_picture and not post.is_anonymous %}
+        <img
+          src="{{ post.author.profile.profile_picture.url }}"
+          alt="{{ post.author.username }}"
+          class="post-avatar"
+        />
+        {% else %}
+        <i class="bi bi-person-fill"></i>
+        {% endif %}
+      </a>
+      <div class="post-author-info">
+        <a
+          href="{% url 'profile' post.author.username %}"
+          style="text-decoration: none"
+        >
+          <div class="post-author-name">
+            {{ post.author.profile.display_name|default:post.author.username }}
+          </div>
+          <div class="post-username">@{{ post.author.username }}</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="post-content">{{ post.content }}</div>
+
+    {% if post.image %}
+    <div class="post-image">
+      <img src="{{ post.image.url }}" alt="Post image" />
     </div>
     {% endif %}
+
+    <div class="post-actions">
+      <button
+        class="post-action-btn {% if post.id in liked_post_ids %}liked{% endif %}"
+        data-post-id="{{ post.id }}"
+        onclick="toggleLike({{ post.id }})"
+      >
+        <i
+          class="bi {% if post.id in liked_post_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"
+        ></i>
+        <span>{{ post.likes.count }}</span>
+      </button>
+      <a href="{% url 'post_detail' post.id %}" class="post-action-btn">
+        <i class="bi bi-chat"></i>
+        <span>{{ post.comments.count }}</span>
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Posts Pagination -->
+  {% if posts.has_other_pages %}
+  <div class="pagination-container">
+    {% if posts.has_previous %}
+    <a
+      href="?q={{ search_query }}&tab={{ current_tab }}&page={{ posts.previous_page_number }}"
+      >&laquo; Prev</a
+    >
+    {% endif %}
+    <span class="current"
+      >Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span
+    >
+    {% if posts.has_next %}
+    <a
+      href="?q={{ search_query }}&tab={{ current_tab }}&page={{ posts.next_page_number }}"
+      >Next &raquo;</a
+    >
+    {% endif %}
+  </div>
+  {% endif %} {% else %}
+  <div class="no-results">
+    <i class="bi bi-file-earmark-x"></i>
+    <h3>No posts found</h3>
+    <p>Try searching for something else</p>
+  </div>
+  {% endif %} {% endif %} {% else %}
+  <!-- Initial Search Prompt -->
+  <div class="search-prompt">
+    <i class="bi bi-search"></i>
+    <h3>Search</h3>
+    <p>Find posts, users, and media</p>
+  </div>
+  {% endif %}
 </div>
 
 <script>
-document.getElementById('searchInput').focus();
+  document.getElementById("searchInput").focus();
 
-function toggleLike(postId) {
+  function toggleLike(postId) {
     fetch(`/post/${postId}/like/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json',
-        },
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/json",
+      },
     })
-    .then(response => response.json())
-    .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         const btn = document.querySelector(`[data-post-id="${postId}"]`);
-        const icon = btn.querySelector('i');
-        const count = btn.querySelector('span');
-        
+        const icon = btn.querySelector("i");
+        const count = btn.querySelector("span");
+
         if (data.liked) {
-            btn.classList.add('liked');
-            icon.classList.remove('bi-heart');
-            icon.classList.add('bi-heart-fill');
+          btn.classList.add("liked");
+          icon.classList.remove("bi-heart");
+          icon.classList.add("bi-heart-fill");
         } else {
-            btn.classList.remove('liked');
-            icon.classList.remove('bi-heart-fill');
-            icon.classList.add('bi-heart');
+          btn.classList.remove("liked");
+          icon.classList.remove("bi-heart-fill");
+          icon.classList.add("bi-heart");
         }
         count.textContent = data.likes_count;
-    });
-}
+      });
+  }
 
-function toggleFollow(userId) {
+  function toggleFollow(userId) {
     fetch(`/user/${userId}/follow/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json',
-        },
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/json",
+      },
     })
-    .then(response => response.json())
-    .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         const btn = document.querySelector(`[data-user-id="${userId}"]`);
         if (data.following) {
-            btn.classList.remove('follow');
-            btn.classList.add('following');
-            btn.textContent = 'Following';
+          btn.classList.remove("follow");
+          btn.classList.add("following");
+          btn.textContent = "Following";
         } else {
-            btn.classList.remove('following');
-            btn.classList.add('follow');
-            btn.textContent = 'Follow';
+          btn.classList.remove("following");
+          btn.classList.add("follow");
+          btn.textContent = "Follow";
         }
-    });
-}
+      });
+  }
 </script>
 
 {% endblock %}

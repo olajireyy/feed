@@ -1,7 +1,7 @@
 {% extends 'modern_base.html' %}
 {% load feed_filters %}
 
-{% block title %}Home / CampusFeed{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -1326,7 +1326,7 @@ async function sharePost(postId, event) {
         if (data.success) {
             if (navigator.share) {
                 await navigator.share({
-                    title: 'CampusFeed Post',
+                    title: '  Post',
                     url: data.url
                 });
             } else {
