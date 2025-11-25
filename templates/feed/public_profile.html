@@ -1,746 +1,652 @@
-{% extends 'general_base.html' %} {% load feed_filters %} {% block title %}@{{
-profile_user.username }} / {% endblock %} {% block extra_css %}
+{% extends 'general_base.html' %}
+{% load feed_filters %}
+
+{% block title %}@{{ profile_user.username }}   {% endblock %}
+
+{% block extra_css %}
 <style>
-  .profile-banner {
-    background: var(--primary-gradient);
-    height: 200px;
-    position: relative;
-  }
+    .profile-banner {
+        background: var(--primary-gradient);
+        height: 200px;
+        position: relative;
+    }
+    
+    .profile-info-section {
+        padding: 0 20px;
+        margin-top: -60px;
+        position: relative;
+    }
+    
+    .profile-avatar-large {
+        width: 120px;
+        height: 120px;
+        border-radius: 20px;
+        border: 4px solid var(--bg-primary);
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+    
+    .profile-avatar-large img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .profile-avatar-large i {
+        font-size: 60px;
+        color: white;
+    }
+    
+    .follow-btn, .message-btn {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 9999px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .follow-btn.following {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+    
+    .follow-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .stats-row {
+        display: flex;
+        gap: 24px;
+        margin: 16px 0;
+    }
+    
+    .stat-item {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .stat-item:hover {
+        color: var(--accent-purple);
+    }
+    
+    .tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+        margin: 20px 0;
+    }
+    
+    .tab {
+        padding: 16px 24px;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+        font-weight: 600;
+    }
+    
+    .tab.active {
+        border-bottom-color: var(--accent-purple);
+        color: var(--accent-purple);
+    }
 
-  .profile-info-section {
-    padding: 0 20px;
-    margin-top: -60px;
-    position: relative;
-  }
-
-  .profile-avatar-large {
-    width: 120px;
-    height: 120px;
-    border-radius: 20px;
-    border: 4px solid var(--bg-primary);
-    background: var(--primary-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    margin-bottom: 16px;
-  }
-
-  .profile-avatar-large img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .profile-avatar-large i {
-    font-size: 60px;
-    color: white;
-  }
-
-  .follow-btn,
-  .message-btn {
-    background: var(--primary-gradient);
-    color: white;
-    border: none;
-    padding: 10px 24px;
-    border-radius: 9999px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  .follow-btn.following {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-  }
-
-  .follow-btn:hover {
-    transform: translateY(-2px);
-  }
-
-  .stats-row {
-    display: flex;
-    gap: 24px;
-    margin: 16px 0;
-  }
-
-  .stat-item {
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .stat-item:hover {
-    color: var(--accent-purple);
-  }
-
-  .tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border-color);
-    margin: 20px 0;
-  }
-
-  .tab {
-    padding: 16px 24px;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-    font-weight: 600;
-  }
-
-  .tab.active {
-    border-bottom-color: var(--accent-purple);
-    color: var(--accent-purple);
-  }
-
-  .post {
-    border-bottom: 1px solid var(--border-color);
-    padding: 16px;
-    transition: background-color 0.2s;
-    cursor: pointer;
-  }
-
-  .post:hover {
-    background-color: rgba(255, 255, 255, 0.03);
-  }
-
-  .post-header {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 12px;
-  }
-
-  .post-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    margin-right: 12px;
-    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-
-  .post-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .post-avatar i {
-    color: white;
-    font-size: 24px;
-  }
-
-  .post-author {
-    flex: 1;
-  }
-
-  .post-author-name {
-    font-weight: 700;
-    font-size: 15px;
-  }
-
-  .post-author-handle {
-    color: var(--text-secondary);
-    font-size: 15px;
-  }
-
-  .post-time {
-    color: var(--text-secondary);
-    font-size: 15px;
-  }
-
-  .post-content {
-    font-size: 15px;
-    line-height: 20px;
-    margin-bottom: 12px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-  }
-
-  .post-media {
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 12px;
-    border: 1px solid var(--border-color);
-  }
-
-  .post-media img,
-  .post-media video {
-    width: 100%;
-    display: block;
-  }
-
-  .post-media-grid {
-    display: grid;
-    gap: 4px;
-    border-radius: 16px;
-    overflow: hidden;
-  }
-
-  .post-media-grid.one {
-    max-height: none;
-  }
-
-  .post-media-grid.two {
-    grid-template-columns: 1fr 1fr;
-    max-height: 400px;
-  }
-
-  .post-media-grid.three {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    max-height: 400px;
-  }
-
-  .post-media-grid.three .media-item:first-child {
-    grid-row: 1 / 3;
-  }
-
-  .post-media-grid.four {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    max-height: 400px;
-  }
-
-  .media-item {
-    position: relative;
-    width: 100%;
-    min-height: 150px;
-    overflow: hidden;
-    background: var(--bg-tertiary);
-  }
-
-  .post-media-grid.one .media-item {
-    min-height: 250px;
-    max-height: 500px;
-    height: auto;
-  }
-
-  .post-media-grid.two .media-item {
-    height: 400px;
-  }
-
-  .post-media-grid.three .media-item {
-    height: 100%;
-  }
-
-  .post-media-grid.four .media-item {
-    height: 200px;
-  }
-
-  .media-item img,
-  .media-item video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    cursor: pointer;
-    transition: transform 0.3s;
-  }
-
-  .post-media-grid.one .media-item img,
-  .post-media-grid.one .media-item video {
-    object-fit: contain;
-    height: auto;
-    max-height: 500px;
-  }
-
-  .media-item:hover img {
-    transform: scale(1.05);
-  }
-
-  .media-more-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    font-weight: 700;
-    color: white;
-    cursor: pointer;
-  }
-
-  .post-actions {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--border-color);
-  }
-
-  .post-action-btn {
-    display: flex;
-    align-items: center;
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 10px 20px;
-    border-radius: 8px;
-    transition: all 0.2s;
-    font-size: 14px;
-    font-weight: 600;
-    flex: 1;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .post-action-btn i {
-    font-size: 20px;
-  }
-
-  .post-action-btn:hover {
-    background-color: rgba(29, 155, 240, 0.1);
-    color: var(--primary-color);
-  }
-
-  .post-action-btn.liked {
-    color: #f91880;
-  }
-
-  .post-action-btn.liked:hover {
-    background-color: rgba(249, 24, 128, 0.1);
-  }
-
-  .post-action-btn.bookmarked {
-    color: #ffc107;
-  }
-
-  .badge-category {
-    background-color: var(--bg-secondary);
-    color: var(--primary-color);
-    padding: 4px 12px;
-    border-radius: 9999px;
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  .anonymous-badge {
-    background-color: var(--bg-secondary);
-    color: var(--text-secondary);
-    padding: 4px 12px;
-    border-radius: 9999px;
-    font-size: 13px;
-    font-weight: 600;
-    margin-left: 8px;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-  }
-
-  .empty-state i {
-    font-size: 64px;
-    color: var(--text-secondary);
-    margin-bottom: 16px;
-  }
-
-  .empty-state h3 {
-    font-size: 31px;
-    font-weight: 800;
-    margin-bottom: 8px;
-  }
-
-  .empty-state p {
-    color: var(--text-secondary);
-    font-size: 15px;
-  }
+    .post {
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px;
+        transition: background-color 0.2s;
+        cursor: pointer;
+    }
+    
+    .post:hover {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .post-header {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+    
+    .post-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        margin-right: 12px;
+        background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .post-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .post-avatar i {
+        color: white;
+        font-size: 24px;
+    }
+    
+    .post-author {
+        flex: 1;
+    }
+    
+    .post-author-name {
+        font-weight: 700;
+        font-size: 15px;
+    }
+    
+    .post-author-handle {
+        color: var(--text-secondary);
+        font-size: 15px;
+    }
+    
+    .post-time {
+        color: var(--text-secondary);
+        font-size: 15px;
+    }
+    
+    .post-content {
+        font-size: 15px;
+        line-height: 20px;
+        margin-bottom: 12px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    .post-media {
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 12px;
+        border: 1px solid var(--border-color);
+    }
+    
+    .post-media img, .post-media video {
+        width: 100%;
+        display: block;
+    }
+    
+    .post-media-grid {
+        display: grid;
+        gap: 4px;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .post-media-grid.one {
+        max-height: none;
+    }
+    
+    .post-media-grid.two {
+        grid-template-columns: 1fr 1fr;
+        max-height: 400px;
+    }
+    
+    .post-media-grid.three {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        max-height: 400px;
+    }
+    
+    .post-media-grid.three .media-item:first-child {
+        grid-row: 1 / 3;
+    }
+    
+    .post-media-grid.four {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        max-height: 400px;
+    }
+    
+    .media-item {
+        position: relative;
+        width: 100%;
+        min-height: 150px;
+        overflow: hidden;
+        background: var(--bg-tertiary);
+    }
+    
+    .post-media-grid.one .media-item {
+        min-height: 250px;
+        max-height: 500px;
+        height: auto;
+    }
+    
+    .post-media-grid.two .media-item {
+        height: 400px;
+    }
+    
+    .post-media-grid.three .media-item {
+        height: 100%;
+    }
+    
+    .post-media-grid.four .media-item {
+        height: 200px;
+    }
+    
+    .media-item img, .media-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+    
+    .post-media-grid.one .media-item img,
+    .post-media-grid.one .media-item video {
+        object-fit: contain;
+        height: auto;
+        max-height: 500px;
+    }
+    
+    .media-item:hover img {
+        transform: scale(1.05);
+    }
+    
+    .media-more-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        font-weight: 700;
+        color: white;
+        cursor: pointer;
+    }
+    
+    .post-actions {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .post-action-btn {
+        display: flex;
+        align-items: center;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: all 0.2s;
+        font-size: 14px;
+        font-weight: 600;
+        flex: 1;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .post-action-btn i {
+        font-size: 20px;
+    }
+    
+    .post-action-btn:hover {
+        background-color: rgba(29, 155, 240, 0.1);
+        color: var(--primary-color);
+    }
+    
+    .post-action-btn.liked {
+        color: #f91880;
+    }
+    
+    .post-action-btn.liked:hover {
+        background-color: rgba(249, 24, 128, 0.1);
+    }
+    
+    .post-action-btn.bookmarked {
+        color: #ffc107;
+    }
+    
+    .badge-category {
+        background-color: var(--bg-secondary);
+        color: var(--primary-color);
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    .anonymous-badge {
+        background-color: var(--bg-secondary);
+        color: var(--text-secondary);
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    
+    .empty-state i {
+        font-size: 64px;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+    }
+    
+    .empty-state h3 {
+        font-size: 31px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+    
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 15px;
+    }
+    
 </style>
-{% endblock %} {% block content %}
-<div class="content-header" style="justify-content: flex-start">
-  <a
-    href="javascript:history.back()"
-    style="
-      color: var(--text-primary);
-      text-decoration: none;
-      margin-right: 16px;
-    "
-  >
-    <i class="bi bi-arrow-left"></i>
-  </a>
-  <div>
-    <h1>{{ profile_user.username }}</h1>
-    <p style="font-size: 13px; color: var(--text-secondary); margin: 0">
-      {{ total_posts }} posts
-    </p>
-  </div>
+{% endblock %}
+
+{% block content %}
+<div class="content-header" style="justify-content: flex-start;">
+    <a href="javascript:history.back()" style="color: var(--text-primary); text-decoration: none; margin-right: 16px;">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h1>{{ profile_user.username }}</h1>
+        <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">{{ total_posts }} posts</p>
+    </div>
 </div>
 
 <div class="profile-banner"></div>
 
 <div class="profile-info-section">
-  <div
-    style="display: flex; justify-content: space-between; align-items: start"
-  >
-    <div class="profile-avatar-large">
-      {% if profile_user.profile.profile_picture %}
-      <img
-        src="{{ profile_user.profile.profile_picture.url }}"
-        alt="{{ profile_user.username }}"
-      />
-      {% else %}
-      <i class="bi bi-person-fill"></i>
-      {% endif %}
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+        <div class="profile-avatar-large">
+            {% if profile_user.profile.profile_picture %}
+                <img src="{{ profile_user.profile.profile_picture.url }}" alt="{{ profile_user.username }}">
+            {% else %}
+                <i class="bi bi-person-fill"></i>
+            {% endif %}
+        </div>
+        
+        {% if not is_own_profile %}
+            <div>
+                <button class="follow-btn {% if is_following %}following{% endif %}" onclick="toggleFollow({{ profile_user.id }})">
+                    {% if is_following %}Following{% else %}Follow{% endif %}
+                </button>
+                <button class="message-btn" onclick="window.location.href='{% url 'conversation' profile_user.username %}'">
+                    Message
+                </button>
+            </div>
+        {% else %}
+            <a href="{% url 'myprofile' %}" class="follow-btn" style="text-decoration: none;">
+                Edit Profile
+            </a>
+        {% endif %}
     </div>
-
-    {% if not is_own_profile %}
-    <div>
-      <button
-        class="follow-btn {% if is_following %}following{% endif %}"
-        onclick="toggleFollow({{ profile_user.id }})"
-      >
-        {% if is_following %}Following{% else %}Follow{% endif %}
-      </button>
-      <button
-        class="message-btn"
-        onclick="window.location.href='{% url 'conversation' profile_user.username %}'"
-      >
-        Message
-      </button>
-    </div>
-    {% else %}
-    <a
-      href="{% url 'myprofile' %}"
-      class="follow-btn"
-      style="text-decoration: none"
-    >
-      Edit Profile
-    </a>
+    
+    <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 4px;">{{ profile_user.username }}</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 16px;">@{{ profile_user.username }}</p>
+    
+    {% if profile_user.profile.bio %}
+        <p style="margin-bottom: 16px;">{{ profile_user.profile.bio }}</p>
     {% endif %}
-  </div>
-
-  <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 4px">
-    {{ profile_user.username }}
-  </h2>
-  <p style="color: var(--text-secondary); margin-bottom: 16px">
-    @{{ profile_user.username }}
-  </p>
-
-  {% if profile_user.profile.bio %}
-  <p style="margin-bottom: 16px">{{ profile_user.profile.bio }}</p>
-  {% endif %} {% if profile_user.profile.department %}
-  <p style="color: var(--text-secondary); margin-bottom: 16px">
-    <i class="bi bi-briefcase"></i> {{
-    profile_user.profile.get_department_display }} • {{
-    profile_user.profile.get_level_display }}
-  </p>
-  {% endif %}
-
-  <div class="stats-row">
-    <div class="stat-item">
-      <strong style="color: var(--text-primary)">{{ total_posts }}</strong>
-      <span style="color: var(--text-secondary)"> Posts</span>
+    
+    {% if profile_user.profile.department %}
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">
+            <i class="bi bi-briefcase"></i> {{ profile_user.profile.get_department_display }} • {{ profile_user.profile.get_level_display }}
+        </p>
+    {% endif %}
+    
+    <div class="stats-row">
+        <div class="stat-item">
+            <strong style="color: var(--text-primary);">{{ total_posts }}</strong>
+            <span style="color: var(--text-secondary);"> Posts</span>
+        </div>
+        <div class="stat-item">
+            <strong style="color: var(--text-primary);">{{ followers_count }}</strong>
+            <span style="color: var(--text-secondary);"> Followers</span>
+        </div>
+        <div class="stat-item">
+            <strong style="color: var(--text-primary);">{{ following_count }}</strong>
+            <span style="color: var(--text-secondary);"> Following</span>
+        </div>
     </div>
-    <div class="stat-item">
-      <strong style="color: var(--text-primary)">{{ followers_count }}</strong>
-      <span style="color: var(--text-secondary)"> Followers</span>
+    
+    <div class="tabs">
+        <div class="tab active">Posts</div>
+        <div class="tab">Media</div>
+        <div class="tab">Likes</div>
     </div>
-    <div class="stat-item">
-      <strong style="color: var(--text-primary)">{{ following_count }}</strong>
-      <span style="color: var(--text-secondary)"> Following</span>
-    </div>
-  </div>
-
-  <div class="tabs">
-    <div class="tab active">Posts</div>
-    <div class="tab">Media</div>
-    <div class="tab">Likes</div>
-  </div>
 </div>
 
-<div style="padding: 0 20px">
-  {% for post in posts %}
-  <article
-    class="post"
-    data-post-id="{{ post.id }}"
-    onclick="window.location.href='{% url 'post_detail' post.id %}'"
-  >
-    <div class="post-header">
-      <div class="post-avatar">
-        {% if post.author.profile.profile_picture and not post.is_anonymous %}
-        <img
-          src="{{ post.author.profile.profile_picture.url }}"
-          alt="{{ post.get_author_display }}"
-        />
-        {% else %}
-        <i class="bi bi-person-fill"></i>
-        {% endif %}
-      </div>
-
-      <div class="post-author">
-        <div>
-          <span class="post-author-name">
-            {{ post.get_author_display }} {% if post.is_anonymous %}
-            <i
-              class="bi bi-incognito"
-              style="color: var(--text-secondary); margin-left: 4px"
-            ></i>
+<div style="padding: 0 20px;">
+    {% for post in posts %}
+        <article class="post" data-post-id="{{ post.id }}" onclick="window.location.href='{% url 'post_detail' post.id %}'">
+            <div class="post-header">
+                <div class="post-avatar">
+                    {% if post.author.profile.profile_picture and not post.is_anonymous %}
+                        <img src="{{ post.author.profile.profile_picture.url }}" alt="{{ post.get_author_display }}">
+                    {% else %}
+                        <i class="bi bi-person-fill"></i>
+                    {% endif %}
+                </div>
+                
+                <div class="post-author">
+                    <div>
+                        <span class="post-author-name">
+                            {{ post.get_author_display }}
+                            {% if post.is_anonymous %}
+                                <i class="bi bi-incognito" style="color: var(--text-secondary); margin-left: 4px;"></i>
+                            {% endif %}
+                        </span>
+                        {% if not post.is_anonymous and post.author.profile.department %}
+                            <span class="post-author-handle"> • {{ post.author.profile.get_level_display }}</span>
+                        {% endif %}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                        {% if post.category %}
+                            <span class="badge-category">{{ post.get_category_display }}</span>
+                        {% endif %}
+                        <span class="post-time">{{ post.created_at|smart_time }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            {% if post.content %}
+                <div class="post-content">{{ post.get_content_with_hashtag_links|safe }}</div>
             {% endif %}
-          </span>
-          {% if not post.is_anonymous and post.author.profile.department %}
-          <span class="post-author-handle">
-            • {{ post.author.profile.get_level_display }}</span
-          >
-          {% endif %}
+            
+            <!-- Post Media (Same as feed) -->
+            {% if post.image or post.video or post.images.all %}
+                <div class="post-media">
+                    {% if post.images.all %}
+                        {% with images=post.images.all %}
+                            {% with count=images|length %}
+                            <div class="post-media-grid {% if count == 1 %}one{% elif count == 2 %}two{% elif count == 3 %}three{% elif count >= 4 %}four{% endif %}">
+                                {% for img in images|slice:":4" %}
+                                    <div class="media-item" onclick="event.stopPropagation(); viewImage('{{ img.image.url }}')">
+                                        <img src="{{ img.image.url }}" alt="Post image">
+                                        {% if forloop.last and count > 4 %}
+                                            <div class="media-more-overlay">+{{ count|add:"-4" }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endwith %}
+                        {% endwith %}
+                    {% elif post.image %}
+                        <div class="post-media-grid one">
+                            <div class="media-item" onclick="event.stopPropagation(); viewImage('{{ post.image.url }}')">
+                                <img src="{{ post.image.url }}" alt="Post image">
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if post.video %}
+                        <div style="margin-top: {% if post.images.all or post.image %}8px{% else %}0{% endif %};">
+                            <video controls onclick="event.stopPropagation()" style="width: 100%; max-height: 500px; border-radius: 16px;">
+                                <source src="{{ post.video.url }}" type="video/mp4">
+                            </video>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+            
+            <div class="post-actions">
+                <button class="post-action-btn {% if post.id in liked_post_ids %}liked{% endif %}" onclick="event.stopPropagation(); toggleLike({{ post.id }}, event)">
+                    <i class="bi bi-heart{% if post.id in liked_post_ids %}-fill{% endif %}"></i>
+                    <span class="like-count">{{ post.likes_count }}</span>
+                </button>
+                <button class="post-action-btn comment-btn">
+                    <i class="bi bi-chat"></i>
+                    <span>{{ post.comments_count }}</span>
+                </button>
+                <button class="post-action-btn {% if post.id in bookmarked_post_ids %}bookmarked{% endif %}" onclick="event.stopPropagation(); toggleBookmark({{ post.id }}, event)">
+                    <i class="bi bi-bookmark{% if post.id in bookmarked_post_ids %}-fill{% endif %}"></i>
+                </button>
+                <button class="post-action-btn" onclick="event.stopPropagation(); sharePost({{ post.id }}, event)">
+                    <i class="bi bi-share"></i>
+                    <span>{{ post.shares_count }}</span>
+                </button>
+            </div>
+        </article>
+    {% empty %}
+        <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+            <i class="bi bi-inbox" style="font-size: 48px; margin-bottom: 16px;"></i>
+            <p>No posts yet</p>
         </div>
-        <div
-          style="display: flex; align-items: center; gap: 8px; margin-top: 4px"
-        >
-          {% if post.category %}
-          <span class="badge-category">{{ post.get_category_display }}</span>
-          {% endif %}
-          <span class="post-time">{{ post.created_at|smart_time }}</span>
-        </div>
-      </div>
-    </div>
-
-    {% if post.content %}
-    <div class="post-content">
-      {{ post.get_content_with_hashtag_links|safe }}
-    </div>
-    {% endif %}
-
-    <!-- Post Media (Same as feed) -->
-    {% if post.image or post.video or post.images.all %}
-    <div class="post-media">
-      {% if post.images.all %} {% with images=post.images.all %} {% with
-      count=images|length %}
-      <div
-        class="post-media-grid {% if count == 1 %}one{% elif count == 2 %}two{% elif count == 3 %}three{% elif count >= 4 %}four{% endif %}"
-      >
-        {% for img in images|slice:":4" %}
-        <div
-          class="media-item"
-          onclick="event.stopPropagation(); viewImage('{{ img.image.url }}')"
-        >
-          <img src="{{ img.image.url }}" alt="Post image" />
-          {% if forloop.last and count > 4 %}
-          <div class="media-more-overlay">+{{ count|add:"-4" }}</div>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
-      {% endwith %} {% endwith %} {% elif post.image %}
-      <div class="post-media-grid one">
-        <div
-          class="media-item"
-          onclick="event.stopPropagation(); viewImage('{{ post.image.url }}')"
-        >
-          <img src="{{ post.image.url }}" alt="Post image" />
-        </div>
-      </div>
-      {% endif %} {% if post.video %}
-      <div
-        style="margin-top: {% if post.images.all or post.image %}8px{% else %}0{% endif %};"
-      >
-        <video
-          controls
-          onclick="event.stopPropagation()"
-          style="width: 100%; max-height: 500px; border-radius: 16px"
-        >
-          <source src="{{ post.video.url }}" type="video/mp4" />
-        </video>
-      </div>
-      {% endif %}
-    </div>
-    {% endif %}
-
-    <div class="post-actions">
-      <button
-        class="post-action-btn {% if post.id in liked_post_ids %}liked{% endif %}"
-        onclick="event.stopPropagation(); toggleLike({{ post.id }}, event)"
-      >
-        <i
-          class="bi bi-heart{% if post.id in liked_post_ids %}-fill{% endif %}"
-        ></i>
-        <span class="like-count">{{ post.likes_count }}</span>
-      </button>
-      <button class="post-action-btn comment-btn">
-        <i class="bi bi-chat"></i>
-        <span>{{ post.comments_count }}</span>
-      </button>
-      <button
-        class="post-action-btn {% if post.id in bookmarked_post_ids %}bookmarked{% endif %}"
-        onclick="event.stopPropagation(); toggleBookmark({{ post.id }}, event)"
-      >
-        <i
-          class="bi bi-bookmark{% if post.id in bookmarked_post_ids %}-fill{% endif %}"
-        ></i>
-      </button>
-      <button
-        class="post-action-btn"
-        onclick="event.stopPropagation(); sharePost({{ post.id }}, event)"
-      >
-        <i class="bi bi-share"></i>
-        <span>{{ post.shares_count }}</span>
-      </button>
-    </div>
-  </article>
-  {% empty %}
-  <div
-    style="text-align: center; padding: 60px 20px; color: var(--text-secondary)"
-  >
-    <i class="bi bi-inbox" style="font-size: 48px; margin-bottom: 16px"></i>
-    <p>No posts yet</p>
-  </div>
-  {% endfor %}
+    {% endfor %}
 </div>
 
 <!-- Image Modal -->
-<div
-  id="imageModal"
-  style="
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-  "
-  onclick="closeImageModal()"
->
-  <button
-    onclick="closeImageModal()"
-    style="
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 24px;
-    "
-  >
-    ×
-  </button>
-  <img
-    id="modalImage"
-    src=""
-    style="max-width: 90%; max-height: 90%; object-fit: contain"
-  />
+<div id="imageModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 9999; align-items: center; justify-content: center;" onclick="closeImageModal()">
+    <button onclick="closeImageModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 24px;">×</button>
+    <img id="modalImage" src="" style="max-width: 90%; max-height: 90%; object-fit: contain;">
 </div>
-{% endblock %} {% block extra_js %}
+{% endblock %}
+
+{% block extra_js %}
 <script>
-  function getCookie(name) {
+function getCookie(name) {
     let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
         }
-      }
     }
     return cookieValue;
-  }
+}
 
-  async function toggleFollow(userId) {
+async function toggleFollow(userId) {
     try {
-      const response = await fetch(`/user/${userId}/follow/`, {
-        method: "POST",
-        headers: { "X-CSRFToken": getCookie("csrftoken") },
-      });
-      const data = await response.json();
-      if (data.success) {
-        location.reload();
-      }
+        const response = await fetch(`/user/${userId}/follow/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        const data = await response.json();
+        if (data.success) {
+            location.reload();
+        }
     } catch (error) {
-      console.error("Error:", error);
+        console.error('Error:', error);
     }
-  }
+}
 
-  async function toggleLike(postId, event) {
+async function toggleLike(postId, event) {
     const btn = event.currentTarget;
-    const icon = btn.querySelector("i");
-    const count = btn.querySelector(".like-count");
-
+    const icon = btn.querySelector('i');
+    const count = btn.querySelector('.like-count');
+    
     try {
-      const response = await fetch(`/posts/${postId}/like/`, {
-        method: "POST",
-        headers: { "X-CSRFToken": getCookie("csrftoken") },
-      });
-      const data = await response.json();
-      if (data.success) {
-        if (data.liked) {
-          btn.classList.add("liked");
-          icon.classList.remove("bi-heart");
-          icon.classList.add("bi-heart-fill");
-        } else {
-          btn.classList.remove("liked");
-          icon.classList.remove("bi-heart-fill");
-          icon.classList.add("bi-heart");
+        const response = await fetch(`/posts/${postId}/like/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        const data = await response.json();
+        if (data.success) {
+            if (data.liked) {
+                btn.classList.add('liked');
+                icon.classList.remove('bi-heart');
+                icon.classList.add('bi-heart-fill');
+            } else {
+                btn.classList.remove('liked');
+                icon.classList.remove('bi-heart-fill');
+                icon.classList.add('bi-heart');
+            }
+            count.textContent = data.likes_count;
         }
-        count.textContent = data.likes_count;
-      }
     } catch (error) {
-      console.error("Error:", error);
+        console.error('Error:', error);
     }
-  }
+}
 
-  async function toggleBookmark(postId, event) {
+async function toggleBookmark(postId, event) {
     const btn = event.currentTarget;
-    const icon = btn.querySelector("i");
-
+    const icon = btn.querySelector('i');
+    
     try {
-      const response = await fetch(`/posts/${postId}/bookmark/`, {
-        method: "POST",
-        headers: { "X-CSRFToken": getCookie("csrftoken") },
-      });
-      const data = await response.json();
-      if (data.success) {
-        if (data.bookmarked) {
-          btn.classList.add("bookmarked");
-          icon.classList.remove("bi-bookmark");
-          icon.classList.add("bi-bookmark-fill");
-        } else {
-          btn.classList.remove("bookmarked");
-          icon.classList.remove("bi-bookmark-fill");
-          icon.classList.add("bi-bookmark");
+        const response = await fetch(`/posts/${postId}/bookmark/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        const data = await response.json();
+        if (data.success) {
+            if (data.bookmarked) {
+                btn.classList.add('bookmarked');
+                icon.classList.remove('bi-bookmark');
+                icon.classList.add('bi-bookmark-fill');
+            } else {
+                btn.classList.remove('bookmarked');
+                icon.classList.remove('bi-bookmark-fill');
+                icon.classList.add('bi-bookmark');
+            }
         }
-      }
     } catch (error) {
-      console.error("Error:", error);
+        console.error('Error:', error);
     }
-  }
+}
 
-  async function sharePost(postId, event) {
+async function sharePost(postId, event) {
     try {
-      const response = await fetch(`/posts/${postId}/share/`);
-      const data = await response.json();
-      if (data.success) {
-        if (navigator.share) {
-          await navigator.share({ url: data.url });
-        } else {
-          await navigator.clipboard.writeText(data.url);
-          alert("Link copied! 📋");
+        const response = await fetch(`/posts/${postId}/share/`);
+        const data = await response.json();
+        if (data.success) {
+            if (navigator.share) {
+                await navigator.share({ url: data.url });
+            } else {
+                await navigator.clipboard.writeText(data.url);
+                alert('Link copied! 📋');
+            }
         }
-      }
     } catch (error) {
-      console.error("Error:", error);
+        console.error('Error:', error);
     }
-  }
+}
 
-  function viewImage(url) {
-    document.getElementById("imageModal").style.display = "flex";
-    document.getElementById("modalImage").src = url;
-    document.body.style.overflow = "hidden";
-  }
+function viewImage(url) {
+    document.getElementById('imageModal').style.display = 'flex';
+    document.getElementById('modalImage').src = url;
+    document.body.style.overflow = 'hidden';
+}
 
-  function closeImageModal() {
-    document.getElementById("imageModal").style.display = "none";
-    document.body.style.overflow = "auto";
-  }
+function closeImageModal() {
+    document.getElementById('imageModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
 </script>
 {% endblock %}

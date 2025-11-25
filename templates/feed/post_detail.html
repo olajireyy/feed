@@ -1,625 +1,402 @@
-{% extends 'inbox_base.html' %} {% load feed_filters %} {% block title %}Post by
-{{ post.get_author_display }} / {% endblock %} {% block extra_css %}
+{% extends 'inbox_base.html' %}
+{% load feed_filters %}
+
+{% block title %}Post by {{ post.get_author_display }}   {% endblock %}
+
+{% block extra_css %}
 <style>
-  .post-detail-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-
-  .detail-post-card {
-    background: var(--bg-secondary);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 20px;
-    border: 1px solid var(--border-color);
-  }
-
-  .post-actions-detail {
-    display: flex;
-    gap: 12px;
-    padding: 16px 0;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .action-btn-detail {
-    flex: 1;
-    padding: 12px;
-    background: var(--bg-tertiary);
-    border: none;
-    border-radius: 8px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .action-btn-detail:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-  }
-
-  .action-btn-detail.active {
-    color: var(--accent-purple);
-  }
-
-  .comment-form {
-    background: var(--bg-tertiary);
-    border-radius: 12px;
-    padding: 16px;
-    margin: 20px 0;
-    position: sticky;
-    bottom: 0;
-  }
-
-  .comment-input {
-    width: 100%;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    border-radius: 8px;
-    padding: 12px;
-    resize: vertical;
-    min-height: 50px;
-  }
-
-  .comment-item {
-    background: var(--bg-tertiary);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
-    border: 1px solid var(--border-color);
-  }
-
-  .all-images-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 8px;
-    margin-top: 16px;
-  }
-
-  .all-images-grid img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  .all-images-grid img:hover {
-    transform: scale(1.05);
-  }
+    .post-detail-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .detail-post-card {
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+    }
+    
+    .post-actions-detail {
+        display: flex;
+        gap: 12px;
+        padding: 16px 0;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .action-btn-detail {
+        flex: 1;
+        padding: 12px;
+        background: var(--bg-tertiary);
+        border: none;
+        border-radius: 8px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .action-btn-detail:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+    }
+    
+    .action-btn-detail.active {
+        color: var(--accent-purple);
+    }
+    
+    .comment-form {
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        padding: 16px;
+        margin: 20px 0;
+        position: sticky;
+        bottom: 0;
+    }
+    
+    .comment-input {
+        width: 100%;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: 8px;
+        padding: 12px;
+        resize: vertical;
+        min-height: 50px;
+    }
+    
+    .comment-item {
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        border: 1px solid var(--border-color);
+    }
+    
+    .all-images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 8px;
+        margin-top: 16px;
+    }
+    
+    .all-images-grid img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    
+    .all-images-grid img:hover {
+        transform: scale(1.05);
+    }
 </style>
-{% endblock %} {% block content %}
+{% endblock %}
+
+{% block content %}
 <div class="content-header">
-  <a
-    href="javascript:history.back()"
-    style="color: var(--text-primary); text-decoration: none; margin-right: 80%"
-  >
-    <i class="bi bi-arrow-left"></i>
-  </a>
-  <h1>Post</h1>
+    <a href="javascript:history.back()" style="color: var(--text-primary); text-decoration: none; margin-right: 80%;">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1>Post</h1>
 </div>
 
 <div class="post-detail-container">
-  <div class="detail-post-card">
-    <!-- Author Info -->
-    <div style="display: flex; align-items: center; margin-bottom: 16px">
-      <div
-        style="
-          width: 48px;
-          height: 48px;
-          border-radius: 12px;
-          background: var(--primary-gradient);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-right: 12px;
-          overflow: hidden;
-        "
-        onclick="window.location.href='{% url 'public_profile' post.author %}'"
-      >
-        {% if post.author.profile.profile_picture and not post.is_anonymous %}
-        <img
-          src="{{ post.author.profile.profile_picture.url }}"
-          style="width: 100%; height: 100%; object-fit: cover"
-          alt="{{ post.get_author_display }}"
-        />
-        {% else %}
-        <i class="bi bi-person-fill" style="color: white; font-size: 24px"></i>
-        {% endif %}
-      </div>
-      <div style="flex: 1">
-        <div style="font-weight: 700; font-size: 16px">
-          <a
-            href="{% if not post.is_anonymous %}{% url 'public_profile' post.author.username %}{% else %}#{% endif %}"
-            style="color: var(--text-primary); text-decoration: none"
-          >
-            {{ post.get_author_display }}
-          </a>
-          {% if post.is_anonymous %}
-          <i
-            class="bi bi-incognito"
-            style="color: var(--text-secondary); margin-left: 4px"
-          ></i>
-          {% endif %}
-        </div>
-        <div style="font-size: 14px; color: var(--text-secondary)">
-          {{ post.created_at|full_time }} {% if post.updated_at !=
-          post.created_at %}
-          <span style="margin-left: 8px">(edited)</span>
-          {% endif %}
-        </div>
-      </div>
-
-      {% if is_owner %}
-      <div class="dropdown">
-        <button
-          style="
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-          "
-          data-bs-toggle="dropdown"
-        >
-          <i class="bi bi-three-dots"></i>
-        </button>
-        <ul
-          class="dropdown-menu dropdown-menu-end"
-          style="
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-          "
-        >
-          <li>
-            <a
-              class="dropdown-menu-item"
-              href="{% url 'edit_post' post.id %}"
-              style="
-                color: var(--text-primary);
-                text-decoration: none;
-                display: block;
-                padding: 8px 16px;
-              "
-              ><i class="bi bi-pencil"></i> Edit</a
-            >
-          </li>
-          <li>
-            <form
-              method="post"
-              action="{% url 'delete_post' post.id %}"
-              onsubmit="return confirm('Delete this post?');"
-            >
-              {% csrf_token %}
-              <button
-                type="submit"
-                style="
-                  background: none;
-                  border: none;
-                  color: var(--danger-color);
-                  width: 100%;
-                  text-align: left;
-                  padding: 8px 16px;
-                  cursor: pointer;
-                "
-              >
-                <i class="bi bi-trash"></i> Delete
-              </button>
-            </form>
-          </li>
-        </ul>
-      </div>
-      {% endif %}
-    </div>
-
-    <div style="margin-bottom: 12px">
-      <span
-        style="
-          background: var(--bg-tertiary);
-          padding: 6px 12px;
-          border-radius: 8px;
-          font-size: 13px;
-          font-weight: 600;
-        "
-      >
-        {{ post.get_category_display }}
-      </span>
-    </div>
-
-    <!-- Content -->
-    <div
-      style="
-        font-size: 18px;
-        line-height: fit-content;
-        margin-bottom: 16px;
-        white-space: no-wrap;
-      "
-    >
-      {{ post.get_content_with_hashtag_links|safe }}
-    </div>
-
-    <!-- All Images -->
-    {% if post.images.all %}
-    <div class="all-images-grid">
-      {% for img in post.images.all %}
-      <img
-        src="{{ img.image.url }}"
-        alt="Post image"
-        onclick="viewImage('{{ img.image.url }}')"
-      />
-      {% endfor %}
-    </div>
-    {% elif post.image %}
-    <img
-      src="{{ post.image.url }}"
-      style="
-        width: 100%;
-        max-height: 600px;
-        object-fit: cover;
-        border-radius: 12px;
-        cursor: pointer;
-      "
-      onclick="viewImage('{{ post.image.url }}')"
-    />
-    {% endif %} {% if post.video %}
-    <video controls style="width: 100%; max-height: 600px; border-radius: 12px">
-      <source src="{{ post.video.url }}" type="video/mp4" />
-    </video>
-    {% endif %}
-
-    <!-- Stats -->
-    <div
-      style="
-        display: flex;
-        gap: 24px;
-        padding: 16px 0;
-        color: var(--text-secondary);
-        font-size: 14px;
-      "
-    >
-      <span
-        ><strong style="color: var(--text-primary)"
-          >{{ post.likes_count }}</strong
-        >
-        likes</span
-      >
-      <span
-        ><strong style="color: var(--text-primary)"
-          >{{ post.comments_count }}</strong
-        >
-        comments</span
-      >
-      <span
-        ><strong style="color: var(--text-primary)"
-          >{{ post.shares_count }}</strong
-        >
-        shares</span
-      >
-    </div>
-
-    <!-- Actions -->
-    <div class="post-actions-detail">
-      <button
-        class="action-btn-detail {% if user_liked %}active{% endif %}"
-        onclick="toggleLike({{ post.id }})"
-      >
-        <i class="bi bi-heart{% if user_liked %}-fill{% endif %}"></i>
-      </button>
-      <button
-        class="action-btn-detail"
-        onclick="document.getElementById('commentInput').focus()"
-      >
-        <i class="bi bi-chat"></i>
-      </button>
-      <button
-        class="action-btn-detail {% if user_bookmarked %}active{% endif %}"
-        onclick="toggleBookmark({{ post.id }})"
-      >
-        <i class="bi bi-bookmark{% if user_bookmarked %}-fill{% endif %}"></i>
-      </button>
-      <button class="action-btn-detail" onclick="sharePost({{ post.id }})">
-        <i class="bi bi-share"></i>
-      </button>
-    </div>
-  </div>
-  <!-- Comments List -->
-  <div id="commentsList">
-    <h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 700">
-      Comments ({{ comments.count }})
-    </h3>
-    {% for comment in comments %}
-    <div class="comment-item" id="comment-{{ comment.id }}">
-      <div style="display: flex; gap: 12px">
-        <div
-          style="
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: var(--primary-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-          "
-        >
-          {% if comment.author.profile.profile_picture and not
-          comment.is_anonymous %}
-          <img
-            src="{{ comment.author.profile.profile_picture.url }}"
-            style="
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-              border-radius: 10px;
-            "
-          />
-          {% else %}
-          <i
-            class="bi bi-person-fill"
-            style="color: white; font-size: 20px"
-          ></i>
-          {% endif %}
-        </div>
-        <div style="flex: 1">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: start;
-              margin-bottom: 8px;
-            "
-          >
-            <div>
-              <strong>{{ comment.get_author_display }}</strong>
-              <span
-                style="
-                  color: var(--text-secondary);
-                  font-size: 13px;
-                  margin-left: 8px;
-                "
-              >
-                {{ comment.created_at|smart_time }}
-              </span>
+    <div class="detail-post-card">
+        <!-- Author Info -->
+        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; margin-right: 12px; overflow: hidden;" onclick="window.location.href='{% url 'public_profile' post.author %}'">
+                {% if post.author.profile.profile_picture and not post.is_anonymous %}
+                    <img src="{{ post.author.profile.profile_picture.url }}" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ post.get_author_display }}">
+                {% else %}
+                    <i class="bi bi-person-fill" style="color: white; font-size: 24px;"></i>
+                {% endif %}
             </div>
-            {% if comment.author == user %}
-            <button
-              onclick="deleteComment({{ comment.id }})"
-              style="
-                background: none;
-                border: none;
-                color: var(--text-secondary);
-                cursor: pointer;
-                padding: 4px 8px;
-              "
-            >
-              <i class="bi bi-trash"></i>
-            </button>
+            <div style="flex: 1;">
+                <div style="font-weight: 700; font-size: 16px;">
+                    <a href="{% if not post.is_anonymous %}{% url 'public_profile' post.author.username %}{% else %}#{% endif %}" style="color: var(--text-primary); text-decoration: none;">
+                        {{ post.get_author_display }}
+                    </a>
+                    {% if post.is_anonymous %}
+                        <i class="bi bi-incognito" style="color: var(--text-secondary); margin-left: 4px;"></i>
+                    {% endif %}
+                </div>
+                <div style="font-size: 14px; color: var(--text-secondary);">
+                    {{ post.created_at|full_time }}
+                    {% if post.updated_at != post.created_at %}
+                        <span style="margin-left: 8px;">(edited)</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if is_owner %}
+                <div class="dropdown">
+                    <button style="background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 8px; border-radius: 8px;" data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" style="background: var(--bg-tertiary); border: 1px solid var(--border-color);">
+                        <li><a class="dropdown-menu-item" href="{% url 'edit_post' post.id %}" style="color: var(--text-primary); text-decoration: none; display: block; padding: 8px 16px;"><i class="bi bi-pencil"></i> Edit</a></li>
+                        <li>
+                            <form method="post" action="{% url 'delete_post' post.id %}" onsubmit="return confirm('Delete this post?');">
+                                {% csrf_token %}
+                                <button type="submit" style="background: none; border: none; color: var(--danger-color); width: 100%; text-align: left; padding: 8px 16px; cursor: pointer;">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             {% endif %}
-          </div>
-          <p style="margin: 0; white-space: pre-wrap">{{ comment.content }}</p>
         </div>
-      </div>
+        
+        <div style="margin-bottom: 12px;">
+            <span style="background: var(--bg-tertiary); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;">
+                {{ post.get_category_display }}
+            </span>
+        </div>
+        
+        <!-- Content -->
+        <div style="font-size: 18px; line-height: fit-content; margin-bottom: 16px; white-space: no-wrap;">
+            {{ post.get_content_with_hashtag_links|safe }}
+        </div>
+        
+        <!-- All Images -->
+        {% if post.images.all %}
+            <div class="all-images-grid">
+                {% for img in post.images.all %}
+                    <img src="{{ img.image.url }}" alt="Post image" onclick="viewImage('{{ img.image.url }}')">
+                {% endfor %}
+            </div>
+        {% elif post.image %}
+            <img src="{{ post.image.url }}" style="width: 100%; max-height: 600px; object-fit: cover; border-radius: 12px; cursor: pointer;" onclick="viewImage('{{ post.image.url }}')">
+        {% endif %}
+        
+        {% if post.video %}
+            <video controls style="width: 100%; max-height: 600px; border-radius: 12px;">
+                <source src="{{ post.video.url }}" type="video/mp4">
+            </video>
+        {% endif %}
+        
+        <!-- Stats -->
+        <div style="display: flex; gap: 24px; padding: 16px 0; color: var(--text-secondary); font-size: 14px;">
+            <span><strong style="color: var(--text-primary);">{{ post.likes_count }}</strong> likes</span>
+            <span><strong style="color: var(--text-primary);">{{ post.comments_count }}</strong> comments</span>
+            <span><strong style="color: var(--text-primary);">{{ post.shares_count }}</strong> shares</span>
+        </div>
+        
+        
+        <!-- Actions -->
+        <div class="post-actions-detail">
+            <button class="action-btn-detail {% if user_liked %}active{% endif %}" onclick="toggleLike({{ post.id }})">
+                <i class="bi bi-heart{% if user_liked %}-fill{% endif %}"></i> 
+            </button>
+            <button class="action-btn-detail" onclick="document.getElementById('commentInput').focus()">
+                <i class="bi bi-chat"></i>
+            </button>
+            <button class="action-btn-detail {% if user_bookmarked %}active{% endif %}" onclick="toggleBookmark({{ post.id }})">
+                <i class="bi bi-bookmark{% if user_bookmarked %}-fill{% endif %}"></i> 
+            </button>
+            <button class="action-btn-detail" onclick="sharePost({{ post.id }})">
+                <i class="bi bi-share"></i>
+            </button>
+        </div>
     </div>
-    {% empty %}
-    <p style="text-align: center; color: var(--text-secondary); padding: 40px">
-      No comments yet. Be the first to comment!
-    </p>
-    {% endfor %}
-  </div>
-
-  <!-- Add Comment -->
-  <div class="comment-form">
-    <textarea
-      id="commentInput"
-      class="comment-input"
-      placeholder="Write your comment..."
-    ></textarea>
-    <div
-      style="
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: 12px;
-      "
-    >
-      <label
-        style="display: flex; align-items: center; gap: 8px; cursor: pointer"
-      >
-        <input type="checkbox" id="anonComment" />
-        <span style="font-size: 14px">Anonymously</span>
-      </label>
-      <button
-        onclick="addComment()"
-        style="
-          background: var(--primary-gradient);
-          color: white;
-          border: none;
-          padding: 10px 24px;
-          border-radius: 8px;
-          font-weight: 600;
-          cursor: pointer;
-        "
-      >
-        Comment
-      </button>
+    <!-- Comments List -->
+    <div id="commentsList">
+        <h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 700;">
+            Comments ({{ comments.count }})
+        </h3>
+        {% for comment in comments %}
+            <div class="comment-item" id="comment-{{ comment.id }}">
+                <div style="display: flex; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        {% if comment.author.profile.profile_picture and not comment.is_anonymous %}
+                            <img src="{{ comment.author.profile.profile_picture.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+                        {% else %}
+                            <i class="bi bi-person-fill" style="color: white; font-size: 20px;"></i>
+                        {% endif %}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                            <div>
+                                <strong>{{ comment.get_author_display }}</strong>
+                                <span style="color: var(--text-secondary); font-size: 13px; margin-left: 8px;">
+                                    {{ comment.created_at|smart_time }}
+                                </span>
+                            </div>
+                            {% if comment.author == user %}
+                                <button onclick="deleteComment({{ comment.id }})" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px 8px;">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                        <p style="margin: 0; white-space: pre-wrap;">{{ comment.content }}</p>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p style="text-align: center; color: var(--text-secondary); padding: 40px;">No comments yet. Be the first to comment!</p>
+        {% endfor %}
     </div>
-  </div>
+    
+    <!-- Add Comment -->
+    <div class="comment-form">
+        <textarea id="commentInput" class="comment-input" placeholder="Write your comment..."></textarea>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="anonComment">
+                <span style="font-size: 14px;">Anonymously</span>
+            </label>
+            <button onclick="addComment()" style="background: var(--primary-gradient); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                Comment
+            </button>
+        </div>
+    </div>
+    
+    
 </div>
 
 <!-- Image Modal -->
-<div
-  id="imageModal"
-  style="
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-  "
-  onclick="closeImageModal()"
->
-  <button
-    onclick="closeImageModal()"
-    style="
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 24px;
-    "
-  >
-    ×
-  </button>
-  <img
-    id="modalImage"
-    src=""
-    style="max-width: 90%; max-height: 90%; object-fit: contain"
-  />
+<div id="imageModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 9999; align-items: center; justify-content: center;" onclick="closeImageModal()">
+    <button onclick="closeImageModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 24px;">×</button>
+    <img id="modalImage" src="" style="max-width: 90%; max-height: 90%; object-fit: contain;">
 </div>
-{% endblock %} {% block extra_js %}
-<script>
-  const csrftoken = "{{ csrf_token }}";
+{% endblock %}
 
-  function getCookie(name) {
+{% block extra_js %}
+<script>
+const csrftoken = '{{ csrf_token }}';
+
+function getCookie(name) {
     let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
         }
-      }
     }
     return cookieValue;
-  }
+}
 
-  async function toggleLike(postId) {
-    const btn = document.querySelector(
-      ".action-btn-detail.active, .action-btn-detail:first-child"
-    );
+async function toggleLike(postId) {
+    const btn = document.querySelector('.action-btn-detail.active, .action-btn-detail:first-child');
     try {
-      const response = await fetch(`/posts/${postId}/like/`, {
-        method: "POST",
-        headers: { "X-CSRFToken": getCookie("csrftoken") },
-      });
-      const data = await response.json();
-      if (data.success) {
-        location.reload();
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  }
-
-  async function toggleBookmark(postId) {
-    try {
-      const response = await fetch(`/posts/${postId}/bookmark/`, {
-        method: "POST",
-        headers: { "X-CSRFToken": getCookie("csrftoken") },
-      });
-      const data = await response.json();
-      if (data.success) {
-        location.reload();
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  }
-
-  async function sharePost(postId) {
-    try {
-      const response = await fetch(`/posts/${postId}/share/`, {
-        method: "GET",
-      });
-      const data = await response.json();
-      if (data.success) {
-        if (navigator.share) {
-          await navigator.share({ url: data.url });
-        } else {
-          await navigator.clipboard.writeText(data.url);
-          alert("Link copied! 📋");
+        const response = await fetch(`/posts/${postId}/like/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        const data = await response.json();
+        if (data.success) {
+            location.reload();
         }
-      }
     } catch (error) {
-      console.error("Error:", error);
+        console.error('Error:', error);
     }
-  }
+}
 
-  async function addComment() {
-    const input = document.getElementById("commentInput");
-    const anon = document.getElementById("anonComment");
+async function toggleBookmark(postId) {
+    try {
+        const response = await fetch(`/posts/${postId}/bookmark/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        const data = await response.json();
+        if (data.success) {
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+async function sharePost(postId) {
+    try {
+        const response = await fetch(`/posts/${postId}/share/`, {
+            method: 'GET'
+        });
+        const data = await response.json();
+        if (data.success) {
+            if (navigator.share) {
+                await navigator.share({ url: data.url });
+            } else {
+                await navigator.clipboard.writeText(data.url);
+                alert('Link copied! 📋');
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+async function addComment() {
+    const input = document.getElementById('commentInput');
+    const anon = document.getElementById('anonComment');
     const content = input.value.trim();
-
+    
     if (!content) {
-      alert("Please enter a comment");
-      return;
+        alert('Please enter a comment');
+        return;
     }
-
+    
     const formData = new FormData();
-    formData.append("content", content);
-    formData.append("is_anonymous", anon.checked);
-
+    formData.append('content', content);
+    formData.append('is_anonymous', anon.checked);
+    
     try {
-      const response = await fetch(`/posts/{{ post.id }}/comment/`, {
-        method: "POST",
-        headers: { "X-CSRFToken": getCookie("csrftoken") },
-        body: formData,
-      });
-      const data = await response.json();
-      if (data.success) {
-        location.reload();
-      }
+        const response = await fetch(`/posts/{{ post.id }}/comment/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        });
+        const data = await response.json();
+        if (data.success) {
+            location.reload();
+        }
     } catch (error) {
-      console.error("Error:", error);
+        console.error('Error:', error);
     }
-  }
+}
 
-  async function deleteComment(commentId) {
-    if (!confirm("Delete this comment?")) return;
-
+async function deleteComment(commentId) {
+    if (!confirm('Delete this comment?')) return;
+    
     try {
-      const response = await fetch(`/comments/${commentId}/delete/`, {
-        method: "POST",
-        headers: { "X-CSRFToken": getCookie("csrftoken") },
-      });
-      const data = await response.json();
-      if (data.success) {
-        document.getElementById(`comment-${commentId}`).remove();
-      }
+        const response = await fetch(`/comments/${commentId}/delete/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById(`comment-${commentId}`).remove();
+        }
     } catch (error) {
-      console.error("Error:", error);
+        console.error('Error:', error);
     }
-  }
+}
 
-  function viewImage(url) {
+function viewImage(url) {
     event.stopPropagation();
-    document.getElementById("imageModal").style.display = "flex";
-    document.getElementById("modalImage").src = url;
-    document.body.style.overflow = "hidden";
-  }
+    document.getElementById('imageModal').style.display = 'flex';
+    document.getElementById('modalImage').src = url;
+    document.body.style.overflow = 'hidden';
+}
 
-  function closeImageModal() {
-    document.getElementById("imageModal").style.display = "none";
-    document.body.style.overflow = "auto";
-  }
+function closeImageModal() {
+    document.getElementById('imageModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
 </script>
 {% endblock %}
