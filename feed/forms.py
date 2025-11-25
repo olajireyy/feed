@@ -15,25 +15,25 @@ class UserRegistrationForm(UserCreationForm):
         })
     )
     
-    department = forms.ChoiceField(
-        choices=UserProfile.DEPARTMENT_CHOICES,
-        required=True,
-        widget=forms.Select(attrs={
-            'class': 'form-control'
-        })
-    )
+    # department = forms.ChoiceField(
+    #     choices=UserProfile.DEPARTMENT_CHOICES,
+    #     required=True,
+    #     widget=forms.Select(attrs={
+    #         'class': 'form-control'
+    #     })
+    # )
     
-    level = forms.ChoiceField(
-        choices=UserProfile.LEVEL_CHOICES,
-        required=True,
-        widget=forms.Select(attrs={
-            'class': 'form-control'
-        })
-    )
+    # level = forms.ChoiceField(
+    #     choices=UserProfile.LEVEL_CHOICES,
+    #     required=True,
+    #     widget=forms.Select(attrs={
+    #         'class': 'form-control'
+    #     })
+    # )
     
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2', 'department', 'level']
+        fields = ['username', 'email', 'password1', 'password2']
         widgets = {
             'username': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -65,8 +65,8 @@ class UserRegistrationForm(UserCreationForm):
             user.save()
             # Update the user's profile with department and level
             profile = user.profile
-            profile.department = self.cleaned_data['department']
-            profile.level = self.cleaned_data['level']
+            # profile.department = self.cleaned_data['department']
+            # profile.level = self.cleaned_data['level']
             profile.save()
         
         return user

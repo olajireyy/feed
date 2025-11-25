@@ -625,12 +625,12 @@
                             {% endif %}
                         </span>
                         {% if not post.is_anonymous and post.author.profile.department %}
-                            <span class="post-author-handle"> • {{ post.author.profile.get_level_display }}</span>
+                            <span class="post-author-handle"> • {{ post.created_at|smart_time }}</span>
                         {% endif %}
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
                         <span class="badge-category">{{ post.get_category_display }}</span>
-                        <span class="post-time">{{ post.created_at|smart_time }}</span>
+                        
                     </div>
                 </div>
             </div>

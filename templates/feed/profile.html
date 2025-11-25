@@ -168,23 +168,7 @@
             <input type="email" name="email" value="{{ user.email }}" class="form-control-modern" required>
         </div>
         
-        <div style="margin-bottom: 16px;">
-            <label class="form-label-modern">Department</label>
-            <select name="department" class="form-control-modern" required>
-                {% for value, label in form.department.field.choices %}
-                    <option value="{{ value }}" {% if user.profile.department == value %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        
-        <div style="margin-bottom: 16px;">
-            <label class="form-label-modern">Level</label>
-            <select name="level" class="form-control-modern" required>
-                {% for value, label in form.level.field.choices %}
-                    <option value="{{ value }}" {% if user.profile.level == value %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
-        </div>
+
         
         <div style="margin-bottom: 24px;">
             <label class="form-label-modern">Bio</label>
