@@ -5,6 +5,7 @@ Django settings for campusfeed_project project.
 from pathlib import Path
 import os
 import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -15,7 +16,7 @@ SECRET_KEY = 'django-insecure-95-*zd4y%vcar)omq%-ly+cy3#3i-4k4zrno$u+zl_jfzae0hw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*']  # For production, you might want to limit this to ['.pythonanywhere.com']
 
 
 # Application definition
@@ -28,8 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'feed',
-    'cloudinary',
-    'cloudinary_storage',
+
 ]
 
 MIDDLEWARE = [
@@ -55,79 +55,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.template.context_processors.media',            ],
+                'django.template.context_processors.media',
+            ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'campusfeed_project.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://feed_jjzr_user:mEZjpqEQWfHldpyauMkgaESI2sbxA4iH@dpg-d4ie1bs9c44c739evkv0-a.oregon-postgres.render.com/feed_jjzr')
-}
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'Africa/Lagos'
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('dk0id4wgs'),
-    'API_KEY': os.environ.get('355717681134293'),
-    'API_SECRET': os.environ.get('lm-TqL7HvSd4Gi5lMrrqYVow0TM'),
-}
-
-
-# Login settings
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'feed'
-LOGOUT_REDIRECT_URL = 'login'
 
 # Message tags for Bootstrap alerts
 from django.contrib.messages import constants as messages
