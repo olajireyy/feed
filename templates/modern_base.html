@@ -49,9 +49,11 @@
           Roboto, sans-serif;
         overflow-x: hidden;
       }
+      
       html {
         overflow-x: hidden;
       }
+
       /* Sidebar */
       .sidebar {
         position: fixed;
@@ -66,6 +68,8 @@
         flex-direction: column;
         z-index: 1000;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        overflow-x: hidden;
       }
 
       .sidebar.collapsed {
@@ -111,40 +115,15 @@
         transform: scale(1.05);
       }
 
-      /* App Logo (Outside Sidebar) */
-      .app-logo-fixed {
-        position: fixed;
-        left: 80px;
-        top: 20px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        z-index: 999;
-      }
-
-      .app-logo-fixed i {
-        font-size: 32px;
-        background: var(--primary-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .app-logo-fixed span {
-        font-size: 24px;
-        font-weight: 800;
-        background: var(--primary-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
       .sidebar-logo {
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-bottom: 32px;
+        margin-bottom: 24px;
         padding: 12px;
         background: var(--primary-gradient);
         border-radius: 16px;
+        flex-shrink: 0;
       }
 
       .sidebar-logo i {
@@ -162,6 +141,34 @@
 
       .sidebar-nav {
         flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      .nav-list {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 8px;
+      }
+
+      /* Custom scrollbar for sidebar */
+      .nav-list::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .nav-list::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .nav-list::-webkit-scrollbar-thumb {
+        background: var(--bg-hover);
+        border-radius: 3px;
+      }
+
+      .nav-list::-webkit-scrollbar-thumb:hover {
+        background: var(--border-color);
       }
 
       .nav-item {
@@ -246,6 +253,7 @@
         cursor: pointer;
         transition: all 0.3s;
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        flex-shrink: 0;
       }
 
       .post-btn:hover {
@@ -261,13 +269,9 @@
         cursor: pointer;
         transition: all 0.2s;
         background: var(--bg-tertiary);
-        margin-top: 7%;
+        margin-top: 16px;
+        flex-shrink: 0;
       }
-      @media (max-width: 768px) {
-        .user-profile-sidebar {
-          margin-top: 30%;
-        }
-      } 
 
       .user-profile-sidebar:hover {
         background: var(--bg-hover);
@@ -313,7 +317,7 @@
       .user-handle {
         font-size: 12px;
         color: var(--text-secondary);
-        white-space: nowrap;
+        whitespace: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
@@ -439,7 +443,7 @@
         background: var(--bg-secondary);
         border-top: 1px solid var(--border-color);
         padding: 8px 0;
-        z-index: 1000;
+        z-index: 999;
         backdrop-filter: blur(20px);
       }
 
@@ -463,6 +467,24 @@
         color: var(--accent-purple);
       }
 
+      /* Mobile Sidebar Overlay */
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 999;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .sidebar-overlay.show {
+        opacity: 1;
+      }
+
       /* FAB */
       .fab {
         position: fixed;
@@ -477,7 +499,7 @@
         justify-content: center;
         box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6);
         cursor: pointer;
-        z-index: 999;
+        z-index: 998;
         transition: all 0.3s;
       }
 
@@ -491,6 +513,31 @@
         font-size: 28px;
       }
 
+      /* Floating Search Button */
+      .floating-search-btn {
+        display: none;
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        color: white;
+        font-size: 22px;
+        z-index: 1000;
+        transition: all 0.3s ease;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+      }
+
+      .floating-search-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+        color: white;
+      }
+
       /* Responsive */
       @media (max-width: 1400px) {
         .right-sidebar {
@@ -501,28 +548,35 @@
         }
       }
 
+      @media (min-width: 769px) and (max-width: 1400px) {
+        .floating-search-btn {
+          display: flex;
+        }
+      }
+
       @media (max-width: 768px) {
         .sidebar-toggle {
           display: flex;
         }
 
-        .app-logo-fixed {
-          left: 80px;
-        }
-
         .sidebar {
           transform: translateX(-280px);
+          z-index: 1001;
         }
 
         .sidebar.show {
           transform: translateX(0);
         }
 
+        .sidebar-overlay {
+          display: block;
+        }
+
         .main-content {
           margin-left: 0;
           margin-right: 0;
-          padding: 0; /* Remove padding on mobile */
-          padding-bottom: 80px; /* Space for bottom nav */
+          padding: 0;
+          padding-bottom: 80px;
         }
 
         .mobile-bottom-nav {
@@ -535,7 +589,7 @@
 
         .content-header {
           padding: 25px;
-          justify-content: center; /* Space for hamburger */
+          justify-content: center;
           margin: 0;
           display: flex;
         }
@@ -562,49 +616,13 @@
       ::-webkit-scrollbar-thumb:hover {
         background: var(--bg-hover);
       }
-
-      /* Floating Search Button - Only visible on medium screens */
-      .floating-search-btn {
-        display: none;
-        position: fixed;
-        top: 24px;
-        right: 24px;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: var(--primary-gradient);
-        color: white;
-        font-size: 22px;
-
-        z-index: 1000;
-        transition: all 0.3s ease;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-      }
-
-      .floating-search-btn:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
-        color: white;
-      }
-
-      .floating-search-btn:active {
-        transform: scale(0.95);
-      }
-
-      /* Show only between 769px and 1400px */
-      @media (min-width: 769px) and (max-width: 1400px) {
-        .floating-search-btn {
-          display: flex;
-        }
-      }
     </style>
 
     {% block extra_css %}{% endblock %}
   </head>
   <body>
-    <!-- App Logo (Fixed, Outside Sidebar) -->
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- Sidebar Toggle (User Avatar on Mobile) -->
     <button
@@ -624,16 +642,17 @@
 
     <!-- Desktop Sidebar -->
     <div class="sidebar" id="sidebar">
-      <!-- Logo removed from sidebar, now outside -->
 
-      <nav class="sidebar-nav" style="margin-top: 20px">
-        <ul class="list-unstyled">
+
+      <nav class="sidebar-nav">
+        <ul class="list-unstyled nav-list">
           <li class="nav-item">
             <a
               class="nav-link {% if request.path == '/feed/' %}active{% endif %}"
               href="{% url 'feed' %}"
             >
-              <i class="bi bi-house-door-fill"></i> Feed
+              <i class="bi bi-house-door-fill"></i>
+              <span>Feed</span>
             </a>
           </li>
           <li class="nav-item">
@@ -670,18 +689,12 @@
             >
               <i class="bi bi-chat-dots-fill"></i>
               <span>Messages</span>
-              <span
-                class="unread-count-badge"
-                id="sidebarUnreadBadge"
-                style="display: none"
-              ></span>
             </a>
           </li>
-
           <li class="nav-item">
             <a
               href="{% url 'public_profile' user.username %}"
-              class="nav-link {% if request.path == '/user.username/' %}active{% endif %}"
+              class="nav-link {% if '/user/' in request.path %}active{% endif %}"
             >
               <i class="bi bi-person-fill"></i>
               <span>Profile</span>
@@ -697,26 +710,25 @@
         </button>
 
         <div class="user-profile-sidebar">
-        <div class="user-avatar">
-          {% if user.profile.profile_picture %}
-          <img
-            src="{{ user.profile.profile_picture.url }}"
-            alt="{{ user.username }}"
-          />
-          {% else %}
-          <i class="bi bi-person-fill"></i>
-          {% endif %}
+          <div class="user-avatar">
+            {% if user.profile.profile_picture %}
+            <img
+              src="{{ user.profile.profile_picture.url }}"
+              alt="{{ user.username }}"
+            />
+            {% else %}
+            <i class="bi bi-person-fill"></i>
+            {% endif %}
+          </div>
+          <div class="user-info">
+            <div class="user-name">{{ user.username }}</div>
+            <div class="user-handle">@{{ user.username }}</div>
+          </div>
+          <a href="{% url 'logout' %}" class="logout-btn" title="Logout">
+            <i class="bi bi-box-arrow-right"></i>
+          </a>
         </div>
-        <div class="user-info">
-          <div class="user-name">{{ user.username }}</div>
-          <div class="user-handle">@{{ user.username }}</div>
-        </div>
-        <a href="{% url 'logout' %}" class="logout-btn" title="Logout">
-          <i class="bi bi-box-arrow-right"></i>
-        </a>
-      </div>
       </nav>
-
     </div>
 
     <!-- Main Content -->
@@ -726,14 +738,14 @@
 
     <!-- Right Sidebar -->
     <aside class="right-sidebar">
-      {% if path != '/search/' %}
+      {% if request.path != '/search/' %}
       <a href="/search" style="text-decoration: none">
         <div class="search-box">
           <i
             class="bi bi-search"
             style="color: var(--text-secondary); font-size: 18px"
           ></i>
-          <input placeholder="Search  " id="searchInput" disabled />
+          <input placeholder="Search" id="searchInput" disabled />
         </div>
       </a>
       {% endif %}
@@ -828,16 +840,11 @@
       <a
         href="{% url 'messages_inbox' %}"
         class="mobile-nav-item {% if 'messages' in request.path %}active{% endif %}"
-        style="position: relative"
       >
         <i class="bi bi-chat-dots-fill"></i>
-        <span
-          class="mobile-unread-badge"
-          id="mobileUnreadBadge"
-          style="display: none"
-        ></span>
       </a>
     </nav>
+
     {% if request.path != '/search/' %}
     <a href="{% url 'search' %}" class="floating-search-btn">
       <i class="bi bi-search"></i>
@@ -860,50 +867,57 @@
       const sidebar = document.getElementById("sidebar");
       const mainContent = document.getElementById("mainContent");
       const sidebarToggle = document.getElementById("sidebarToggle");
+      const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+      function openSidebar() {
+        sidebar.classList.add("show");
+        sidebar.classList.remove("collapsed");
+        sidebarOverlay.classList.add("show");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove("show");
+        sidebar.classList.add("collapsed");
+        sidebarOverlay.classList.remove("show");
+        document.body.style.overflow = "";
+      }
 
       sidebarToggle.addEventListener("click", () => {
-        const isCollapsed = sidebar.classList.contains("show");
-
-        sidebar.classList.toggle("show");
-        sidebar.classList.toggle("collapsed");
-        mainContent.classList.toggle("sidebar-collapsed");
-
-        // Hide/show toggle button when sidebar is open on mobile
-        if (window.innerWidth <= 768) {
-          if (!isCollapsed) {
-            sidebarToggle.style.opacity = "0";
-            sidebarToggle.style.pointerEvents = "none";
-          } else {
-            sidebarToggle.style.opacity = "1";
-            sidebarToggle.style.pointerEvents = "all";
-          }
+        if (sidebar.classList.contains("show")) {
+          closeSidebar();
+        } else {
+          openSidebar();
         }
       });
 
-      // Close sidebar when clicking outside on mobile
-      document.addEventListener("click", (e) => {
-        if (
-          window.innerWidth <= 768 &&
-          sidebar.classList.contains("show") &&
-          !sidebar.contains(e.target) &&
-          !sidebarToggle.contains(e.target)
-        ) {
-          sidebar.classList.remove("show");
-          sidebarToggle.style.opacity = "1";
-          sidebarToggle.style.pointerEvents = "all";
-        }
-      });
+      // Close sidebar when clicking overlay
+      sidebarOverlay.addEventListener("click", closeSidebar);
+
+      // Close sidebar when clicking a link on mobile
+      if (window.innerWidth <= 768) {
+        const navLinks = sidebar.querySelectorAll(".nav-link, .post-btn");
+        navLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            if (window.innerWidth <= 768) {
+              closeSidebar();
+            }
+          });
+        });
+      }
 
       // Search functionality
       const searchInput = document.getElementById("searchInput");
-      searchInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          const query = e.target.value;
-          if (query) {
-            window.location.href = `/feed/?q=${encodeURIComponent(query)}`;
+      if (searchInput) {
+        searchInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            const query = e.target.value;
+            if (query) {
+              window.location.href = `/feed/?q=${encodeURIComponent(query)}`;
+            }
           }
-        }
-      });
+        });
+      }
     </script>
 
     {% block extra_js %}{% endblock %}
