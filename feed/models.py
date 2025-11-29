@@ -142,6 +142,36 @@ class Post(models.Model):
                 'profile_picture': None
             }
 
+    # Add these methods to your Post model class
+
+    def has_media(self):
+        """Check if post has any media attached"""
+        return self.images.exists() or bool(self.video) or bool(self.image)
+
+    def get_image_count(self):
+        """Get count of images (including old single image field)"""
+        count = self.images.count()
+        if self.image and not self.images.exists():
+            count += 1
+        return count
+
+    def get_all_images(self):
+        """Get all images including the old single image field if it exists"""
+        images_list = list(self.images.all())
+        # If old image field has content and no new images, include it
+        if self.image and not images_list:
+            # Return a list-like structure for template consistency
+            return [{'image': self.image, 'is_old_format': True}]
+        return images_list
+
+    def get_first_image(self):
+        """Get first image for thumbnail/preview"""
+        if self.images.exists():
+            return self.images.first().image
+        elif self.image:
+            return self.image
+        return None
+
 
 class Like(models.Model):
     """

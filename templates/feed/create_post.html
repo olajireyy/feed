@@ -1,19 +1,24 @@
 {% extends 'general_base.html' %}
 
-{% block title %}Create Post /  {% endblock %}
+{% block title %}Create Post{% endblock %}
 
 {% block extra_css %}
 <style>
     .create-post-container {
         max-width: 600px;
         margin: 0 auto;
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
     }
     
     .create-header {
         display: flex;
         align-items: center;
-        padding: 16px;
+        padding: 16px 20px;
         border-bottom: 1px solid var(--border-color);
+        background: var(--bg-tertiary);
     }
     
     .create-header .close-btn {
@@ -24,11 +29,15 @@
         cursor: pointer;
         padding: 8px;
         border-radius: 50%;
-        transition: background-color 0.2s;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .create-header .close-btn:hover {
         background-color: var(--bg-hover);
+        transform: scale(1.1);
     }
     
     .create-header h1 {
@@ -37,17 +46,27 @@
         font-size: 20px;
         font-weight: 700;
         margin: 0;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
     
     .create-header .post-btn {
-        background-color: var(--primary-color);
+        background: var(--primary-gradient);
         color: white;
         border: none;
         border-radius: 9999px;
-        padding: 8px 24px;
+        padding: 10px 28px;
         font-weight: 700;
         cursor: pointer;
         font-size: 15px;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+    
+    .create-header .post-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
     }
     
     .create-header .post-btn:disabled {
@@ -56,25 +75,25 @@
     }
     
     .create-body {
-        padding: 16px;
+        padding: 20px;
     }
     
     .user-info {
         display: flex;
         align-items: flex-start;
-        margin-bottom: 16px;
+        gap: 12px;
     }
     
     .user-avatar {
         width: 48px;
         height: 48px;
         border-radius: 50%;
-        background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 12px;
         overflow: hidden;
+        flex-shrink: 0;
     }
     
     .user-avatar img {
@@ -90,6 +109,7 @@
     
     .compose-area {
         flex: 1;
+        min-width: 0;
     }
     
     .content-input {
@@ -97,15 +117,31 @@
         background: none;
         border: none;
         color: var(--text-primary);
-        font-size: 20px;
+        font-size: 18px;
         resize: none;
         min-height: 120px;
         outline: none;
         font-family: inherit;
+        line-height: 1.5;
     }
     
     .content-input::placeholder {
         color: var(--text-secondary);
+    }
+    
+    .char-counter {
+        text-align: right;
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-top: 8px;
+    }
+    
+    .char-counter.warning {
+        color: #f59e0b;
+    }
+    
+    .char-counter.danger {
+        color: #ef4444;
     }
     
     .media-preview {
@@ -115,14 +151,25 @@
         grid-template-columns: repeat(2, 1fr);
     }
     
+    .media-preview.single {
+        grid-template-columns: 1fr;
+    }
+    
+    .media-preview.three .media-preview-item:first-child {
+        grid-column: 1 / -1;
+    }
+    
     .media-preview-item {
         position: relative;
         border-radius: 16px;
         overflow: hidden;
         aspect-ratio: 16/9;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
     }
     
-    .media-preview-item img, .media-preview-item video {
+    .media-preview-item img, 
+    .media-preview-item video {
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -133,6 +180,7 @@
         top: 8px;
         right: 8px;
         background-color: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(10px);
         border: none;
         border-radius: 50%;
         width: 32px;
@@ -142,74 +190,229 @@
         justify-content: center;
         color: white;
         cursor: pointer;
+        transition: all 0.2s;
+        z-index: 10;
     }
     
-    .media-actions {
+    .remove-media:hover {
+        background-color: rgba(239, 68, 68, 0.9);
+        transform: scale(1.1);
+    }
+    
+    .add-more-media {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 16px;
-        padding: 16px 0;
+        justify-content: center;
+        background: var(--bg-hover);
+        border: 2px dashed var(--border-color);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .add-more-media:hover {
+        border-color: var(--accent-purple);
+        background: rgba(139, 92, 246, 0.1);
+    }
+    
+    .add-more-media i {
+        font-size: 32px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+    
+    .add-more-media span {
+        font-size: 13px;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+    
+    .options-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+        padding-top: 16px;
         border-top: 1px solid var(--border-color);
     }
     
-    .media-btn {
-        background: none;
-        border: none;
-        color: var(--primary-color);
-        font-size: 20px;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 50%;
-        transition: background-color 0.2s;
-    }
-    
-    .media-btn:hover {
-        background-color: rgba(29, 155, 240, 0.1);
-    }
-    
     .form-select-modern {
-        background-color: var(--bg-secondary);
+        background-color: var(--bg-tertiary);
         border: 1px solid var(--border-color);
         color: var(--text-primary);
-        border-radius: 8px;
-        padding: 12px;
-        font-size: 10px;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 14px;
         cursor: pointer;
-       width: 30%;
+        flex: 1;
+        min-width: 150px;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    
+    .form-select-modern:hover {
+        border-color: var(--accent-purple);
+    }
+    
+    .form-select-modern:focus {
+        outline: none;
+        border-color: var(--accent-purple);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
     }
     
     .form-check-modern {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px;
-        background-color: var(--bg-secondary);
-        border-radius: 8px;
+        gap: 10px;
+        padding: 12px 16px;
+        background-color: var(--bg-tertiary);
+        border-radius: 12px;
         cursor: pointer;
-         width: 30%;
+        border: 1px solid var(--border-color);
+        transition: all 0.2s;
+        flex: 1;
+        min-width: 150px;
+    }
+    
+    .form-check-modern:hover {
+        border-color: var(--accent-purple);
+        background-color: var(--bg-hover);
     }
     
     .form-check-modern input {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
         cursor: pointer;
+        accent-color: var(--accent-purple);
     }
     
     .form-check-modern label {
         cursor: pointer;
-        font-size: 10px;
+        font-size: 14px;
         margin: 0;
-        
+        font-weight: 500;
+        user-select: none;
     }
     
-    .options-section {
+    .media-actions {
         display: flex;
-        flex-direction: column;
-        gap: 12px;
+        align-items: center;
+        gap: 8px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
         margin-top: 16px;
     }
-    .post-btn{
-        width: 17%;
+    
+    .media-btn {
+        background: none;
+        border: none;
+        color: var(--accent-purple);
+        font-size: 20px;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 50%;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .media-btn:hover {
+        background-color: rgba(139, 92, 246, 0.1);
+        transform: scale(1.1);
+    }
+    
+    .media-btn:active {
+        transform: scale(0.95);
+    }
+    
+    .media-btn.disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+    
+    .media-btn.disabled:hover {
+        background: none;
+        transform: none;
+    }
+    
+    .media-count {
+        margin-left: auto;
+        font-size: 13px;
+        color: var(--text-secondary);
+        padding: 6px 12px;
+        background: var(--bg-tertiary);
+        border-radius: 20px;
+        font-weight: 600;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .create-post-container {
+            border-radius: 0;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        .create-header {
+            padding: 12px 16px;
+        }
+        
+        .create-header h1 {
+            font-size: 18px;
+        }
+        
+        .create-header .post-btn {
+            padding: 8px 20px;
+            font-size: 14px;
+        }
+        
+        .create-body {
+            padding: 16px;
+        }
+        
+        .content-input {
+            font-size: 16px;
+            min-height: 100px;
+        }
+        
+        .options-section {
+            flex-direction: column;
+        }
+        
+        .form-select-modern,
+        .form-check-modern {
+            width: 100%;
+            min-width: auto;
+        }
+        
+        .media-actions {
+            flex-wrap: wrap;
+        }
+        
+        .media-btn {
+            font-size: 22px;
+            padding: 12px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .content-input {
+            font-size: 15px;
+        }
+        
+        .media-preview {
+            gap: 6px;
+        }
+        
+        .media-preview-item {
+            border-radius: 12px;
+        }
     }
 </style>
 {% endblock %}
@@ -217,11 +420,11 @@
 {% block content %}
 <div class="create-post-container">
     <div class="create-header">
-        <button class="close-btn" onclick="window.location.href='{% url 'feed' %}'">
+        <button class="close-btn" onclick="window.location.href='{% url 'feed' %}';" type="button">
             <i class="bi bi-x-lg"></i>
         </button>
         <h1>Create Post</h1>
-        <button class="post-btn" id="submitBtn" disabled>Post</button>
+        <button class="post-btn" id="submitBtn" disabled type="button">Post</button>
     </div>
     
     <form id="createPostForm" method="post" enctype="multipart/form-data">
@@ -243,13 +446,14 @@
                         class="content-input" 
                         placeholder="What's happening on campus?"
                         id="contentInput"
-                        required
                     ></textarea>
+                    
+                    <div class="char-counter" id="charCounter">0 / 280</div>
                     
                     <div id="mediaPreview" class="media-preview"></div>
                     
                     <div class="options-section">
-                        <select name="category" class="form-select-modern" required>
+                        <select name="category" class="form-select-modern" id="categorySelect">
                             <option value="">Select Category</option>
                             {% for value, label in form.category.field.choices %}
                                 {% if value %}
@@ -263,28 +467,30 @@
                             <label for="anonymousCheck">Post anonymously</label>
                         </div>
                     </div>
+                    
+                    <div class="media-actions">
+                        <input type="file" id="imageInput" name="images" accept="image/*" multiple style="display: none;">
+                        <input type="file" id="videoInput" name="video" accept="video/*" style="display: none;">
+                        
+                        <button type="button" class="media-btn" id="imageBtn" title="Add images (max 4)">
+                            <i class="bi bi-image"></i>
+                        </button>
+                        
+                        <button type="button" class="media-btn" id="videoBtn" title="Add video">
+                            <i class="bi bi-play-btn"></i>
+                        </button>
+                        
+                        <button type="button" class="media-btn" title="Add emoji">
+                            <i class="bi bi-emoji-smile"></i>
+                        </button>
+                        
+                        <button type="button" class="media-btn" id="hashtagBtn" title="Add hashtag">
+                            <i class="bi bi-hash"></i>
+                        </button>
+                        
+                        <span class="media-count" id="mediaCount" style="display: none;"></span>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="media-actions">
-                <input type="file" id="imageInput" name="images" accept="image/*" multiple style="display: none;">
-                <input type="file" id="videoInput" name="video" accept="video/*" style="display: none;">
-                
-                <button type="button" class="media-btn" onclick="document.getElementById('imageInput').click()">
-                    <i class="bi bi-image"></i>
-                </button>
-                
-                <button type="button" class="media-btn" onclick="document.getElementById('videoInput').click()">
-                    <i class="bi bi-play-btn"></i>
-                </button>
-                
-                <button type="button" class="media-btn" onclick="insertEmoji('😊')">
-                    <i class="bi bi-emoji-smile"></i>
-                </button>
-                
-                <button type="button" class="media-btn" title="Add hashtag" onclick="insertHashtag()">
-                    <i class="bi bi-hash"></i>
-                </button>
             </div>
         </div>
     </form>
@@ -299,56 +505,161 @@ const form = document.getElementById('createPostForm');
 const imageInput = document.getElementById('imageInput');
 const videoInput = document.getElementById('videoInput');
 const mediaPreview = document.getElementById('mediaPreview');
+const charCounter = document.getElementById('charCounter');
+const categorySelect = document.getElementById('categorySelect');
+const imageBtn = document.getElementById('imageBtn');
+const videoBtn = document.getElementById('videoBtn');
+const hashtagBtn = document.getElementById('hashtagBtn');
+const mediaCount = document.getElementById('mediaCount');
 
 let selectedImages = [];
 let selectedVideo = null;
+const MAX_IMAGES = 4;
+const MAX_CHARS = 280;
 
-// Enable submit button when there's content
+// Update submit button state
+function updateSubmitButton() {
+    const hasContent = contentInput.value.trim().length > 0;
+    const hasMedia = selectedImages.length > 0 || selectedVideo !== null;
+    
+    // Enable if has content OR media
+    submitBtn.disabled = !(hasContent || hasMedia);
+}
+
+// Update character counter
+function updateCharCounter() {
+    const length = contentInput.value.length;
+    charCounter.textContent = `${length} / ${MAX_CHARS}`;
+    
+    charCounter.classList.remove('warning', 'danger');
+    if (length > MAX_CHARS * 0.9) {
+        charCounter.classList.add('warning');
+    }
+    if (length > MAX_CHARS) {
+        charCounter.classList.add('danger');
+    }
+}
+
+// Update media count display
+function updateMediaCount() {
+    if (selectedImages.length > 0) {
+        mediaCount.textContent = `${selectedImages.length} / ${MAX_IMAGES} images`;
+        mediaCount.style.display = 'block';
+    } else if (selectedVideo) {
+        mediaCount.textContent = '1 video';
+        mediaCount.style.display = 'block';
+    } else {
+        mediaCount.style.display = 'none';
+    }
+}
+
+// Update media button states
+function updateMediaButtons() {
+    if (selectedVideo) {
+        imageBtn.classList.add('disabled');
+        videoBtn.classList.remove('disabled');
+    } else if (selectedImages.length >= MAX_IMAGES) {
+        imageBtn.classList.add('disabled');
+        videoBtn.classList.add('disabled');
+    } else if (selectedImages.length > 0) {
+        imageBtn.classList.remove('disabled');
+        videoBtn.classList.add('disabled');
+    } else {
+        imageBtn.classList.remove('disabled');
+        videoBtn.classList.remove('disabled');
+    }
+}
+
+// Handle content input
 contentInput.addEventListener('input', () => {
-    submitBtn.disabled = contentInput.value.trim().length === 0;
+    let value = contentInput.value;
+    if (value.length > MAX_CHARS) {
+        contentInput.value = value.substring(0, MAX_CHARS);
+    }
+    updateCharCounter();
+    updateSubmitButton();
 });
 
-// Handle image selection
+// Handle category selection
+categorySelect.addEventListener('change', updateSubmitButton);
+
+// Handle image selection - IMPROVED to allow adding more
 imageInput.addEventListener('change', (e) => {
-    const files = Array.from(e.target.files);
-    selectedImages = files.slice(0, 4); // Max 4 images
-    displayMediaPreview();
+    if (imageBtn.classList.contains('disabled')) return;
+    
+    const newFiles = Array.from(e.target.files);
+    const availableSlots = MAX_IMAGES - selectedImages.length;
+    
+    if (availableSlots > 0) {
+        const filesToAdd = newFiles.slice(0, availableSlots);
+        selectedImages = [...selectedImages, ...filesToAdd];
+        displayMediaPreview();
+        updateSubmitButton();
+        updateMediaButtons();
+        updateMediaCount();
+    }
+    
+    // Reset input to allow selecting same files again
+    imageInput.value = '';
 });
 
 // Handle video selection
 videoInput.addEventListener('change', (e) => {
+    if (videoBtn.classList.contains('disabled')) return;
+    
     if (e.target.files.length > 0) {
         selectedVideo = e.target.files[0];
         selectedImages = []; // Clear images if video is selected
         displayMediaPreview();
+        updateSubmitButton();
+        updateMediaButtons();
+        updateMediaCount();
     }
 });
 
+// Display media preview
 function displayMediaPreview() {
     mediaPreview.innerHTML = '';
     
     if (selectedVideo) {
+        mediaPreview.classList.add('single');
+        mediaPreview.classList.remove('three');
+        
         const videoElement = document.createElement('div');
         videoElement.className = 'media-preview-item';
-        videoElement.style.gridColumn = '1 / -1';
         
         const video = document.createElement('video');
         video.src = URL.createObjectURL(selectedVideo);
         video.controls = true;
         
         const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
         removeBtn.className = 'remove-media';
         removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
         removeBtn.onclick = () => {
             selectedVideo = null;
             videoInput.value = '';
             displayMediaPreview();
+            updateSubmitButton();
+            updateMediaButtons();
+            updateMediaCount();
         };
         
         videoElement.appendChild(video);
         videoElement.appendChild(removeBtn);
         mediaPreview.appendChild(videoElement);
-    } else {
+    } else if (selectedImages.length > 0) {
+        // Update grid layout based on number of images
+        if (selectedImages.length === 1) {
+            mediaPreview.classList.add('single');
+            mediaPreview.classList.remove('three');
+        } else if (selectedImages.length === 3) {
+            mediaPreview.classList.add('three');
+            mediaPreview.classList.remove('single');
+        } else {
+            mediaPreview.classList.remove('single', 'three');
+        }
+        
         selectedImages.forEach((file, index) => {
             const imgElement = document.createElement('div');
             imgElement.className = 'media-preview-item';
@@ -357,61 +668,95 @@ function displayMediaPreview() {
             img.src = URL.createObjectURL(file);
             
             const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
             removeBtn.className = 'remove-media';
             removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
             removeBtn.onclick = () => {
                 selectedImages.splice(index, 1);
                 displayMediaPreview();
-                
-                // Update file input
-                const dt = new DataTransfer();
-                selectedImages.forEach(file => dt.items.add(file));
-                imageInput.files = dt.files;
+                updateSubmitButton();
+                updateMediaButtons();
+                updateMediaCount();
             };
             
             imgElement.appendChild(img);
             imgElement.appendChild(removeBtn);
             mediaPreview.appendChild(imgElement);
         });
+        
+        // Add "Add More" button if less than max
+        if (selectedImages.length < MAX_IMAGES) {
+            const addMoreElement = document.createElement('div');
+            addMoreElement.className = 'media-preview-item add-more-media';
+            addMoreElement.onclick = () => imageInput.click();
+            addMoreElement.innerHTML = `
+                <i class="bi bi-plus-circle"></i>
+                <span>Add More</span>
+            `;
+            mediaPreview.appendChild(addMoreElement);
+        }
     }
 }
 
-function insertEmoji(emoji) {
-    const start = contentInput.selectionStart;
-    const end = contentInput.selectionEnd;
-    const text = contentInput.value;
-    contentInput.value = text.substring(0, start) + emoji + text.substring(end);
-    contentInput.focus();
-    contentInput.selectionStart = contentInput.selectionEnd = start + emoji.length;
-    submitBtn.disabled = false;
-}
+// Image button click handler
+imageBtn.addEventListener('click', () => {
+    if (!imageBtn.classList.contains('disabled')) {
+        imageInput.click();
+    }
+});
 
-function insertHashtag() {
+// Video button click handler
+videoBtn.addEventListener('click', () => {
+    if (!videoBtn.classList.contains('disabled')) {
+        videoInput.click();
+    }
+});
+
+// Emoji button - simple implementation
+document.querySelector('.media-btn[title="Add emoji"]').addEventListener('click', () => {
+    const emojis = ['😊', '😂', '❤️', '🔥', '👍', '🎉', '💯', '🤔', '😍', '👏'];
+    const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+    insertAtCursor(emoji);
+});
+
+// Hashtag button
+hashtagBtn.addEventListener('click', () => {
+    insertAtCursor('#');
+});
+
+// Insert text at cursor position
+function insertAtCursor(text) {
     const start = contentInput.selectionStart;
     const end = contentInput.selectionEnd;
-    const text = contentInput.value;
-    const hashtag = '#';
-    contentInput.value = text.substring(0, start) + hashtag + text.substring(end);
+    const currentValue = contentInput.value;
+    
+    contentInput.value = currentValue.substring(0, start) + text + currentValue.substring(end);
     contentInput.focus();
-    contentInput.selectionStart = contentInput.selectionEnd = start + 1;
-    submitBtn.disabled = false;
+    
+    const newPosition = start + text.length;
+    contentInput.selectionStart = contentInput.selectionEnd = newPosition;
+    
+    updateCharCounter();
+    updateSubmitButton();
 }
 
 // Submit form
 submitBtn.addEventListener('click', () => {
-    if (contentInput.value.trim().length > 0) {
+    if (!submitBtn.disabled) {
+        // Update form with selected files
+        const dt = new DataTransfer();
+        selectedImages.forEach(file => dt.items.add(file));
+        imageInput.files = dt.files;
+        
         submitBtn.disabled = true;
         submitBtn.textContent = 'Posting...';
         form.submit();
     }
 });
 
-// Character counter (optional)
-contentInput.addEventListener('input', () => {
-    const length = contentInput.value.length;
-    if (length > 280) {
-        contentInput.value = contentInput.value.substring(0, 280);
-    }
-});
+// Initialize
+updateCharCounter();
+updateSubmitButton();
+updateMediaButtons();
 </script>
 {% endblock %}

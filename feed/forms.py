@@ -3,6 +3,27 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import UserProfile, Post
 
+
+class MultipleFileInput(forms.ClearableFileInput):
+    """Custom widget for multiple file uploads"""
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    """Custom field for multiple file uploads"""
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        return result
+
+
 class UserRegistrationForm(UserCreationForm):
     """
     Extended registration form with campus-specific fields
@@ -14,22 +35,6 @@ class UserRegistrationForm(UserCreationForm):
             'placeholder': 'Email address'
         })
     )
-    
-    # department = forms.ChoiceField(
-    #     choices=UserProfile.DEPARTMENT_CHOICES,
-    #     required=True,
-    #     widget=forms.Select(attrs={
-    #         'class': 'form-control'
-    #     })
-    # )
-    
-    # level = forms.ChoiceField(
-    #     choices=UserProfile.LEVEL_CHOICES,
-    #     required=True,
-    #     widget=forms.Select(attrs={
-    #         'class': 'form-control'
-    #     })
-    # )
     
     class Meta:
         model = User
@@ -43,7 +48,6 @@ class UserRegistrationForm(UserCreationForm):
     
     def __init__(self, *args, **kwargs):
         super(UserRegistrationForm, self).__init__(*args, **kwargs)
-        # Add Bootstrap classes to password fields
         self.fields['password1'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Password'
@@ -53,7 +57,6 @@ class UserRegistrationForm(UserCreationForm):
             'placeholder': 'Confirm password'
         })
         
-        # Update help texts
         self.fields['username'].help_text = 'Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'
         self.fields['password1'].help_text = 'Your password must contain at least 8 characters.'
     
@@ -63,10 +66,7 @@ class UserRegistrationForm(UserCreationForm):
         
         if commit:
             user.save()
-            # Update the user's profile with department and level
             profile = user.profile
-            # profile.department = self.cleaned_data['department']
-            # profile.level = self.cleaned_data['level']
             profile.save()
         
         return user
@@ -130,7 +130,6 @@ class ProfileUpdateForm(forms.ModelForm):
         
         if commit:
             profile.save()
-            # Update user's email
             user = profile.user
             user.email = self.cleaned_data['email']
             user.save()
@@ -140,20 +139,22 @@ class ProfileUpdateForm(forms.ModelForm):
 
 class PostForm(forms.ModelForm):
     """
-    Form for creating posts
+    Form for creating posts - now handles multiple images
     """
+    # Override to handle multiple images with custom field
+    images = MultipleFileField(
+        required=False,
+        label='Add images (optional)'
+    )
+    
     class Meta:
         model = Post
-        fields = ['content', 'image', 'video', 'category', 'is_anonymous']
+        fields = ['content', 'video', 'category', 'is_anonymous']
         widgets = {
             'content': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
                 'placeholder': "What's on your mind?",
-            }),
-            'image': forms.FileInput(attrs={
-                'class': 'form-control',
-                'accept': 'image/*'
             }),
             'video': forms.FileInput(attrs={
                 'class': 'form-control',
@@ -168,7 +169,6 @@ class PostForm(forms.ModelForm):
         }
         labels = {
             'content': 'What\'s on your mind?',
-            'image': 'Add an image (optional)',
             'video': 'Add a video (optional)',
             'category': 'Category (optional)',
             'is_anonymous': 'Post anonymously'
@@ -176,18 +176,22 @@ class PostForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super(PostForm, self).__init__(*args, **kwargs)
+        # Make all fields optional - validation will check if at least one media exists
         self.fields['content'].required = False
+        self.fields['video'].required = False
         self.fields['category'].required = False
+        self.fields['images'].required = False
         self.fields['category'].empty_label = "Select category (optional)"
     
     def clean(self):
         cleaned_data = super().clean()
-        content = cleaned_data.get('content')
-        image = cleaned_data.get('image')
+        content = cleaned_data.get('content', '').strip()
         video = cleaned_data.get('video')
         
-        # At least one of content, image, or video must be provided
-        if not content and not image and not video:
-            raise forms.ValidationError('Post must have content, image, or video.')
+        # Check if images were uploaded (these come from request.FILES)
+        # We'll validate this in the view since the form doesn't have direct access
+        
+        # Don't raise validation error here - let the view handle it
+        # since we need to check request.FILES for multiple images
         
         return cleaned_data

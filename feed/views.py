@@ -524,32 +524,54 @@ def bookmarks_view(request):
 @login_required
 def create_post_page_view(request):
     """
-    Separate page for creating posts
+    Separate page for creating posts with multiple images or video support
     """
     if request.method == 'POST':
-        form = PostForm(request.POST, request.FILES)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            # Set default category if not provided
-            if not post.category:
-                post.category = 'GENERAL'
-            post.save()
-            
-            # Handle multiple images (even with video)
-            images = request.FILES.getlist('images')
-            for idx, image in enumerate(images):
-                PostImage.objects.create(post=post, image=image, order=idx)
-            
-            messages.success(request, 'Post created successfully! 🎉')
-            return redirect('feed')
-        else:
-            messages.error(request, 'Please fix the errors below.')
+        # Get uploaded media from request.FILES
+        images = request.FILES.getlist('images')
+        video = request.FILES.get('video')
+        content = request.POST.get('content', '').strip()
+        category = request.POST.get('category', '')
+        is_anonymous = request.POST.get('is_anonymous') == 'on'
+        
+        # Validate that at least one of content, images, or video exists
+        if not content and not images and not video:
+            messages.error(request, 'Post must have content, images, or video.')
+            form = PostForm(request.POST)
+            return render(request, 'feed/create_post.html', {'form': form})
+        
+        # Validate max images
+        if len(images) > 4:
+            messages.error(request, 'Maximum 4 images allowed per post.')
+            form = PostForm(request.POST)
+            return render(request, 'feed/create_post.html', {'form': form})
+        
+        # Validate that both images and video are not uploaded together
+        if images and video:
+            messages.error(request, 'Cannot upload both images and video in the same post.')
+            form = PostForm(request.POST)
+            return render(request, 'feed/create_post.html', {'form': form})
+        
+        # Create the post manually to handle the validation properly
+        post = Post(
+            author=request.user,
+            content=content if content else '',  # Empty string if no content
+            category=category if category else 'GENERAL',
+            is_anonymous=is_anonymous,
+            video=video if video else None
+        )
+        post.save()
+        
+        # Save multiple images with order
+        for idx, image in enumerate(images):
+            PostImage.objects.create(post=post, image=image, order=idx)
+        
+        messages.success(request, 'Post created successfully! 🎉')
+        return redirect('feed')
     else:
         form = PostForm()
     
     return render(request, 'feed/create_post.html', {'form': form})
-
 
 @login_required
 def get_share_link_view(request, post_id):

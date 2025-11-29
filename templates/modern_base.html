@@ -261,9 +261,13 @@
         cursor: pointer;
         transition: all 0.2s;
         background: var(--bg-tertiary);
-        position: relative;
-        bottom: 57px;
+        margin-top: 7%;
       }
+      @media (max-width: 768px) {
+        .user-profile-sidebar {
+          margin-top: 30%;
+        }
+      } 
 
       .user-profile-sidebar:hover {
         background: var(--bg-hover);
@@ -691,9 +695,8 @@
         >
           <i class="bi bi-plus-lg"></i> Create Post
         </button>
-      </nav>
 
-      <div class="user-profile-sidebar">
+        <div class="user-profile-sidebar">
         <div class="user-avatar">
           {% if user.profile.profile_picture %}
           <img
@@ -712,6 +715,8 @@
           <i class="bi bi-box-arrow-right"></i>
         </a>
       </div>
+      </nav>
+
     </div>
 
     <!-- Main Content -->
