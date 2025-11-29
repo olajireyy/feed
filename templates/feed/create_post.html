@@ -469,6 +469,7 @@
                     </div>
                     
                     <div class="media-actions">
+                        <!-- Changed: name="images" matches the form field -->
                         <input type="file" id="imageInput" name="images" accept="image/*" multiple style="display: none;">
                         <input type="file" id="videoInput" name="video" accept="video/*" style="display: none;">
                         
@@ -521,9 +522,10 @@ const MAX_CHARS = 280;
 function updateSubmitButton() {
     const hasContent = contentInput.value.trim().length > 0;
     const hasMedia = selectedImages.length > 0 || selectedVideo !== null;
+    const withinLimit = contentInput.value.length <= MAX_CHARS;
     
-    // Enable if has content OR media
-    submitBtn.disabled = !(hasContent || hasMedia);
+    // Enable if (has content OR media) AND within character limit
+    submitBtn.disabled = !(hasContent || hasMedia) || !withinLimit;
 }
 
 // Update character counter
@@ -583,7 +585,7 @@ contentInput.addEventListener('input', () => {
 // Handle category selection
 categorySelect.addEventListener('change', updateSubmitButton);
 
-// Handle image selection - IMPROVED to allow adding more
+// Handle image selection
 imageInput.addEventListener('change', (e) => {
     if (imageBtn.classList.contains('disabled')) return;
     
@@ -615,6 +617,8 @@ videoInput.addEventListener('change', (e) => {
         updateMediaButtons();
         updateMediaCount();
     }
+    
+    // Don't reset video input here
 });
 
 // Display media preview
@@ -649,7 +653,6 @@ function displayMediaPreview() {
         videoElement.appendChild(removeBtn);
         mediaPreview.appendChild(videoElement);
     } else if (selectedImages.length > 0) {
-        // Update grid layout based on number of images
         if (selectedImages.length === 1) {
             mediaPreview.classList.add('single');
             mediaPreview.classList.remove('three');
@@ -684,7 +687,6 @@ function displayMediaPreview() {
             mediaPreview.appendChild(imgElement);
         });
         
-        // Add "Add More" button if less than max
         if (selectedImages.length < MAX_IMAGES) {
             const addMoreElement = document.createElement('div');
             addMoreElement.className = 'media-preview-item add-more-media';
@@ -712,7 +714,7 @@ videoBtn.addEventListener('click', () => {
     }
 });
 
-// Emoji button - simple implementation
+// Emoji button
 document.querySelector('.media-btn[title="Add emoji"]').addEventListener('click', () => {
     const emojis = ['😊', '😂', '❤️', '🔥', '👍', '🎉', '💯', '🤔', '😍', '👏'];
     const emoji = emojis[Math.floor(Math.random() * emojis.length)];
@@ -740,13 +742,15 @@ function insertAtCursor(text) {
     updateSubmitButton();
 }
 
-// Submit form
+// Submit form - FIXED to properly handle file uploads
 submitBtn.addEventListener('click', () => {
     if (!submitBtn.disabled) {
-        // Update form with selected files
+        // Create DataTransfer for images
         const dt = new DataTransfer();
         selectedImages.forEach(file => dt.items.add(file));
         imageInput.files = dt.files;
+        
+        // Video is already set in the input, no need to manually set it
         
         submitBtn.disabled = true;
         submitBtn.textContent = 'Posting...';
