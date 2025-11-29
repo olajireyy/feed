@@ -631,7 +631,7 @@
                                 <i class="bi bi-incognito" style="color: var(--text-secondary); margin-left: 4px;" title="Anonymous"></i>
                             {% endif %}
                         </span>
-                        {% if not post.is_anonymous and post.author.profile.department %}
+                        {% if not post.is_anonymous %}
                             <span class="post-author-handle"> • {{ post.created_at|smart_time }}</span>
                         {% endif %}
                     </div>
@@ -650,10 +650,10 @@
                     {% if post.images.all %}
                         {% with images=post.images.all %}
                             {% with count=images|length %}
-                                <div class="post-media-grid {% if count == 1 %}one{% elif count == 2 %}two{% elif count == 3 %}three{% elif count >= 4 %}four{% endif %}">
+                                <div class="post-media-grid {% if count == 1 %}one{% elif count == 2 %}two{% elif count == 3 %}three{% elif count >= 4 %}four{% endif %}" onclick="window.location.href='{% url 'post_detail' post.id %}'">
                                     {% for img in images|slice:":4" %}
-                                        <div class="media-item">
-                                            <img src="{{ img.image.url }}" alt="Post image" onclick="viewImage('{{ img.image.url }}')">
+                                        <div class="media-item" onclick="window.location.href='{% url 'post_detail' post.id %}'">
+                                            <img src="{{ img.image.url }}" alt="Post image">
                                             {% if forloop.last and count > 4 %}
                                                 <div class="media-more-overlay">
                                                     +{{ count|add:"-4" }}
@@ -666,8 +666,8 @@
                         {% endwith %}
                     {% elif post.image %}
                         <div class="post-media-grid one">
-                            <div class="media-item">
-                                <img src="{{ post.image.url }}" alt="Post image" onclick="viewImage('{{ post.image.url }}')">
+                            <div class="media-item" onclick="viewImage('{{ post.image.url }}')">
+                                <img src="{{ post.image.url }}" alt="Post image">
                             </div>
                         </div>
                     {% endif %}
@@ -768,11 +768,7 @@
     </div>
 </div>
 
-<!-- Image Modal -->
-<div id="imageModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 9999; align-items: center; justify-content: center;" onclick="closeImageModal()">
-    <button onclick="closeImageModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 24px;">×</button>
-    <img id="modalImage" src="" style="max-width: 90%; max-height: 90%; object-fit: contain;">
-</div>
+
 
 {% block extra_js %}
 <script>
