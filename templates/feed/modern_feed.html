@@ -77,29 +77,15 @@
 
 /* Loading spinner in banner */
 .new-posts-banner .spinner-border {
-    width: 14px;
-    height: 14px;
-    border-width: 2px;
-}
-
-
-    .post {
-        border-bottom: 1px solid var(--border-color);
-        padding: 16px;
-        transition: background-color 0.2s;
-        cursor: pointer;
-    }
-    
-    .post:hover {
-        background-color: rgba(255, 255, 255, 0.03);
+        margin-bottom: 12px;
     }
     
     .post-header {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         margin-bottom: 12px;
     }
-    
+
     .post-avatar {
         width: 48px;
         height: 48px;
@@ -650,7 +636,7 @@
                     {% if post.images.all %}
                         {% with images=post.images.all %}
                             {% with count=images|length %}
-                                <div class="post-media-grid {% if count == 1 %}one{% elif count == 2 %}two{% elif count == 3 %}three{% elif count >= 4 %}four{% endif %}" onclick="window.location.href='{% url 'post_detail' post.id %}'">
+                                <div class="post-media-grid {% if count == 1 %}one{% elif count == 2 %}two{% elif count == 3 %}three{% elif count >= 4 %}four{% endif %}" >
                                     {% for img in images|slice:":4" %}
                                         <div class="media-item" onclick="window.location.href='{% url 'post_detail' post.id %}'">
                                             <img src="{{ img.image.url }}" alt="Post image">
@@ -1321,7 +1307,7 @@ async function toggleBookmark(postId, event) {
     }
 }
 
-async function sharePost(postId, event) {
+async function sharePostNative(postId, event) {
     event.stopPropagation();
     
     try {

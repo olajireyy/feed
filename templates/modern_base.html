@@ -479,10 +479,12 @@
         z-index: 999;
         opacity: 0;
         transition: opacity 0.3s;
+        pointer-events: none;
       }
 
       .sidebar-overlay.show {
         opacity: 1;
+        pointer-events: auto;
       }
 
       /* FAB */
@@ -549,9 +551,6 @@
       }
 
       @media (min-width: 769px) and (max-width: 1400px) {
-        .floating-search-btn {
-          display: flex;
-        }
       }
 
       @media (max-width: 768px) {
@@ -575,7 +574,7 @@
         .main-content {
           margin-left: 0;
           margin-right: 0;
-          padding: 0;
+          padding: 16px;
           padding-bottom: 80px;
         }
 
@@ -653,15 +652,6 @@
             >
               <i class="bi bi-house-door-fill"></i>
               <span>Feed</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              href="{% url 'trending' %}"
-              class="nav-link {% if request.path == '/trending/' %}active{% endif %}"
-            >
-              <i class="bi bi-fire"></i>
-              <span>Trending</span>
             </a>
           </li>
           <li class="nav-item">
@@ -818,12 +808,6 @@
         class="mobile-nav-item {% if request.path == '/feed/' %}active{% endif %}"
       >
         <i class="bi bi-house-door-fill"></i>
-      </a>
-      <a
-        href="{% url 'trending' %}"
-        class="mobile-nav-item {% if request.path == '/trending/' %}active{% endif %}"
-      >
-        <i class="bi bi-fire"></i>
       </a>
       <a
         href="{% url 'notifications' %}"
