@@ -1,6 +1,6 @@
 {% extends 'general_base.html' %}
 
-{% block title %}Search  {% endblock %}
+{% block title %}Search {{ search_query }} {% endblock %}
 
 {% block content %}
 
@@ -309,7 +309,7 @@
             <input 
                 type="text" 
                 name="q" 
-                placeholder="Search  " 
+                placeholder="Search {{ search_query }}" 
                 id="searchInput"
                 value="{{ search_query|default:'' }}"
                 autocomplete="off"
@@ -376,17 +376,6 @@
                         <div class="user-bio" style="font-size: 11px;">{{ user.profile.bio|truncatewords:10 }}</div>
                     {% endif %}
                 </div>
-                <!-- {% if user != request.user %}
-                    {% if user in following %}
-                        <button class="follow-btn following" data-user-id="{{ user.id }}" onclick="toggleFollow({{ profile_user.id }})">
-                            Following
-                        </button>
-                    {% else %}
-                        <button class="follow-btn follow" data-user-id="{{ user.id }}" onclick="toggleFollow({{ profile_user.id }})">
-                            Follow
-                        </button>
-                    {% endif %}
-                {% endif %} -->
             </div>
             {% endfor %}
 
@@ -412,8 +401,41 @@
 
     <!-- Posts Tab Content (Top, Latest, Media) -->
     {% else %}
+        <!-- Top Users Section for Top Tab -->
+        {% if current_tab == 'top' and top_users %}
+        <div class="section-header" style="padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+            <h3 style="font-size: 20px; font-weight: 700; margin: 0;">People</h3>
+            <a href="?q={{ search_query }}&tab=users" style="color: var(--primary-color); text-decoration: none; font-size: 14px;">See all</a>
+        </div>
+        
+        {% for user in top_users %}
+        <div class="user-card">
+            <a href="{% url 'public_profile' user.username %}">
+                {% if user.profile.profile_picture %}
+                    <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" class="user-avatar">
+                {% else %}
+                    <i class="bi bi-person-fill user-avatar" style="display: flex; align-items: center; justify-content: center; background-color: var(--background-secondary); font-size: 24px;"></i>
+                {% endif %}
+            </a>
+            <div class="user-info">
+                <a href="{% url 'public_profile' user.username %}" class="user-display-name">
+                    {{ user.profile.display_name|default:user.username }}
+                </a>
+                <div class="user-username" style="font-size: 12px;">@{{ user.username }}</div>
+                {% if user.profile.bio %}
+                    <div class="user-bio" style="font-size: 11px;">{{ user.profile.bio|truncatewords:10 }}</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div style="height: 8px; background-color: var(--background-secondary); border-bottom: 1px solid var(--border-color);"></div>
+        {% endif %}
+<br><br>
         {% if posts %}
+        <h3 style="font-size: 20px; font-weight: 700; margin-left: 15px;">Posts</h3><hr>
             {% for post in posts %}
+        
             <div class="post-card">
                 <div class="post-header">
                     <a href="{% url 'profile' post.author.username %}">
@@ -479,7 +501,7 @@
     <!-- Initial Search Prompt -->
     <div class="search-prompt">
         <i class="bi bi-search"></i>
-        <h3>Search  </h3>
+        <h3>Search {{ search_query }} </h3>
         <p>Find posts, users, and media</p>
     </div>
     {% endif %}

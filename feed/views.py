@@ -142,7 +142,7 @@ def profile_view(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Your profile has been updated! ✅')
-            return redirect('profile')
+            return redirect('public_profile', username=request.user.username)
     else:
         form = ProfileUpdateForm(instance=request.user.profile)
     
@@ -574,32 +574,6 @@ def create_post_page_view(request):
     return render(request, 'feed/create_post.html', {'form': form})
 
 @login_required
-def get_share_link_view(request, post_id):
-    """
-    Generate shareable link for post
-    """
-    post = get_object_or_404(Post, id=post_id)
-    
-    # Track share
-    PostShare.objects.create(
-        user=request.user,
-        post=post,
-        shared_via='LINK'
-    )
-    
-    # Update share count
-    post.shares_count = post.share_records.count()
-    post.save(update_fields=['shares_count'])
-    
-    share_url = request.build_absolute_uri(f'/post/{post_id}/')
-    
-    return JsonResponse({
-        'success': True,
-        'url': share_url
-    })
-
-
-@login_required
 @require_POST
 def toggle_follow_view(request, user_id):
     """
@@ -766,6 +740,7 @@ def search(request):
     posts = Post.objects.none()
     users = User.objects.none()
     following_users = []
+    top_users = User.objects.none()
     
     if query:
         if tab == 'users':
@@ -782,9 +757,6 @@ def search(request):
             page_number = request.GET.get('page')
             users = paginator.get_page(page_number)
             
-            # Get users that current user is following (adjust based on your Follow model)
-            # following_users = request.user.profile.following.all()
-            
         else:
             # Base query for posts
             posts = Post.objects.filter(
@@ -796,6 +768,16 @@ def search(request):
             elif tab == 'media':
                 posts = posts.exclude(image='').exclude(image__isnull=True).order_by('-created_at')
             else:  # 'top'
+                # Get top users for the top tab
+                top_users = User.objects.filter(
+                    Q(username__icontains=query) | 
+                    Q(first_name__icontains=query) |
+                    Q(last_name__icontains=query) |
+                    Q(profile__bio__icontains=query)
+                ).annotate(
+                    followers_count=Count('followers')
+                ).order_by('-followers_count')[:3].select_related('profile')
+
                 posts = posts.annotate(
                     engagement=Count('likes') + Count('comments')
                 ).order_by('-engagement', '-created_at')
@@ -809,6 +791,7 @@ def search(request):
     context = {
         'posts': posts,
         'users': users,
+        'top_users': top_users,
         'liked_post_ids': list(liked_post_ids),
         'search_query': query,
         'current_tab': tab,
@@ -816,8 +799,6 @@ def search(request):
     }
     
     return render(request, 'feed/search_results.html', context)
-
-
 
 
 from django.http import JsonResponse

@@ -41,6 +41,7 @@ urlpatterns = [
     path('@<str:username>/', views.public_profile_view, name='public_profile'),
     
     # Profile
+    path('profile/edit/', views.profile_view, name='edit_profile'),
     path('profile/<str:username>/', views.profile_view, name='profile'),
     path('profile/', views.profile_view, name='myprofile'),
 
