@@ -613,15 +613,7 @@
               <i class="bi bi-house-door-fill"></i> Feed
             </a>
           </li>
-          <li class="nav-item">
-            <a
-              href="{% url 'trending' %}"
-              class="nav-link {% if request.path == '/trending/' %}active{% endif %}"
-            >
-              <i class="bi bi-fire"></i>
-              <span>Trending</span>
-            </a>
-          </li>
+          
           <li class="nav-item">
             <a
               href="{% url 'notifications' %}"
@@ -782,12 +774,6 @@
         class="mobile-nav-item {% if request.path == '/feed/' %}active{% endif %}"
       >
         <i class="bi bi-house-door-fill"></i>
-      </a>
-      <a
-        href="{% url 'trending' %}"
-        class="mobile-nav-item {% if request.path == '/trending/' %}active{% endif %}"
-      >
-        <i class="bi bi-fire"></i>
       </a>
       <a
         href="{% url 'notifications' %}"
